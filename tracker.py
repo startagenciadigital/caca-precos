@@ -2706,7 +2706,7 @@ def git_push_update():
             print("No remote origin 'origin' configured. Skipping auto git push.")
             return
             
-        subprocess.run(["git", "add", "dashboard.html", "index.html", "data.json", "deals.md"], cwd=base_dir)
+        subprocess.run(["git", "add", "dashboard.html", "index.html", "data.json", "products.json", "config.json", "deals.md"], cwd=base_dir)
         subprocess.run(["git", "add", "deals_*.md"], cwd=base_dir)
         
         status_res = subprocess.run(["git", "status", "--porcelain"], cwd=base_dir, capture_output=True, text=True)
