@@ -1,3 +1,4 @@
 {
-  "search_interval": "3h"
+  "search_interval": "3h",
+  "access_pin": "140608"
 }

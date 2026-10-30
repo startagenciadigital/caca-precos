@@ -587,7 +587,38 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- PIN Lock Screen Overlay -->
+    <div id="pin-lock-overlay" style="position: fixed; inset: 0; z-index: 9999; background: #0f172a; background-image: radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.25) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.25) 0px, transparent 50%); display: flex; align-items: center; justify-content: center; padding: 1.5rem; transition: opacity 0.3s ease, visibility 0.3s ease;">
+        <div style="width: 100%; max-width: 400px; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 2.5rem 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); text-align: center;">
+            <div style="width: 64px; height: 64px; margin: 0 auto 1.25rem; border-radius: 50%; background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2)); border: 1px solid rgba(139, 92, 246, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; color: #a78bfa; box-shadow: 0 0 20px rgba(139, 92, 246, 0.25);">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">Caça-Preços Web</h2>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.75rem;">Acesso Familiar Restrito</p>
+            
+            <form id="form-pin-lock" onsubmit="handlePinSubmit(event);">
+                <div style="margin-bottom: 1.25rem;">
+                    <label for="input-pin" style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 0.6rem;">Digite o PIN de 6 dígitos</label>
+                    <input type="password" id="input-pin" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" autofocus placeholder="••••••" style="width: 100%; padding: 0.9rem; text-align: center; font-size: 1.6rem; letter-spacing: 0.6rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(15, 23, 42, 0.6); color: #fff; outline: none; font-family: monospace; transition: all 0.2s;" onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 3px rgba(139, 92, 246, 0.2)';" onblur="this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
+                </div>
+                
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;" onclick="const cb = document.getElementById('cb-remember'); cb.checked = !cb.checked;">
+                    <input type="checkbox" id="cb-remember" checked onclick="event.stopPropagation();" style="accent-color: var(--accent-primary); width: 16px; height: 16px; cursor: pointer;">
+                    <span>Lembrar neste aparelho</span>
+                </div>
+                
+                <button type="submit" id="btn-unlock-pin" style="width: 100%; padding: 0.85rem; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: transform 0.1s, opacity 0.2s; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);">
+                    <i class="fa-solid fa-lock-open"></i> Entrar
+                </button>
+                
+                <div id="pin-error-msg" style="display: none; margin-top: 1rem; padding: 0.6rem; border-radius: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-size: 0.85rem;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> PIN incorreto. Tente novamente.
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="container" id="main-app-container" style="display: none;">
         <header>
             <div class="title-area">
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 0.5rem;">
@@ -610,12 +641,15 @@
                 </div>
                 <p>Monitorando: <strong id="header-product-title" style="color: var(--accent-secondary); font-weight: 700;">Carregando...</strong> &bull; Rastreador Inteligente em Tempo Real</p>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <a href="#" onclick="window.location.reload();" class="btn-action btn-refresh">
                     <i class="fa-solid fa-rotate-right"></i> Atualizar
                 </a>
                 <button id="btn-new-search" class="btn-action btn-search-trigger">
                     <i class="fa-solid fa-magnifying-glass"></i> Buscar Agora
+                </button>
+                <button id="btn-lock-session" onclick="lockSession();" class="btn-action" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); font-weight: 600;" title="Bloquear e sair">
+                    <i class="fa-solid fa-lock"></i> Sair
                 </button>
             </div>
         </header>
@@ -866,1290 +900,100 @@
     </div>
     
     <script>
-        const embeddedData = {
-  "products": {
-    "yamaha-yc73": {
-      "name": "Yamaha YC73",
-      "currency": "USD",
-      "active": false,
-      "target_price": 2150.0,
-      "best_deal": {
-        "title": "Yamaha YC73 73-key Stage Keyboard",
-        "price": 2699.99,
-        "price_str": "$2,699.99",
-        "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-        "source": "Sweetwater"
-      },
-      "deals": [
-        {
-          "date": "2026-05-20",
-          "price_raw": "~$2,599.99",
-          "usd_price": 2599.99,
-          "retailer": "Major Retailers",
-          "title": "Standard retail price. eBay listings hover around $2,699.",
-          "link": "N/A",
-          "status": "Started"
-        },
-        {
-          "date": "2026-05-20 11:40:09",
-          "price_raw": "N/A",
-          "usd_price": null,
-          "retailer": "None",
-          "title": "No items found",
-          "link": "N/A",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-20 11:40:12",
-          "price_raw": "N/A",
-          "usd_price": null,
-          "retailer": "None",
-          "title": "No items found",
-          "link": "N/A",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-20 11:51:33",
-          "price_raw": "R$ 13,630.09 (~$2,726.02)",
-          "usd_price": 2726.02,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-20 11:55:17",
-          "price_raw": "R$ 13,630.09 (~$2,726.02)",
-          "usd_price": 2726.02,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-20 11:56:45",
-          "price_raw": "R$ 13,630.09 (~$2,726.02)",
-          "usd_price": 2726.02,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-20 12:02:14",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-20 12:06:51",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-20 18:12:51",
-          "price_raw": "N/A",
-          "usd_price": null,
-          "retailer": "None",
-          "title": "No items found",
-          "link": "N/A",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 09:42:55",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 11:44:31",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 11:45:28",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 11:48:19",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 12:10:15",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 12:18:14",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 14:00:50",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 15:07:00",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 16:22:49",
-          "price_raw": "R$ 13,499.95 (~$2,694.28)",
-          "usd_price": 2694.28,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 16:26:47",
-          "price_raw": "R$ 13,499.95 (~$2,694.28)",
-          "usd_price": 2694.28,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 17:30:52",
-          "price_raw": "R$ 13,499.95 (~$2,692.02)",
-          "usd_price": 2692.02,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-22 09:44:08",
-          "price_raw": "R$ 13,512.37 (~$2,686.09)",
-          "usd_price": 2686.09,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-22 12:04:49",
-          "price_raw": "R$ 13,512.37 (~$2,682.14)",
-          "usd_price": 2682.14,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-22 12:08:27",
-          "price_raw": "R$ 13,512.37 (~$2,680.87)",
-          "usd_price": 2680.87,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-22 14:00:51",
-          "price_raw": "R$ 13,512.37 (~$2,682.89)",
-          "usd_price": 2682.89,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-22 17:01:00",
-          "price_raw": "R$ 13,512.37 (~$2,681.08)",
-          "usd_price": 2681.08,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-25 14:39:11",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-25 17:39:20",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-26 09:00:16",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-26 12:00:32",
-          "price_raw": "R$ 13,546.39 (~$2,691.73)",
-          "usd_price": 2691.73,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-26 15:00:49",
-          "price_raw": "R$ 13,546.39 (~$2,689.75)",
-          "usd_price": 2689.75,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-26 18:01:00",
-          "price_raw": "R$ 13,546.39 (~$2,685.32)",
-          "usd_price": 2685.32,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-27 11:42:46",
-          "price_raw": "R$ 13,590.94 (~$2,676.91)",
-          "usd_price": 2676.91,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-27 14:43:04",
-          "price_raw": "R$ 13,590.94 (~$2,678.70)",
-          "usd_price": 2678.7,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-27 17:43:14",
-          "price_raw": "R$ 13,590.94 (~$2,679.60)",
-          "usd_price": 2679.6,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-28 09:10:56",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-28 12:11:06",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-28 15:11:35",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-29 08:57:10",
-          "price_raw": "R$ 13,608.76 (~$2,699.08)",
-          "usd_price": 2699.08,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-29 11:57:19",
-          "price_raw": "R$ 13,608.76 (~$2,684.39)",
-          "usd_price": 2684.39,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-29 14:57:37",
-          "price_raw": "R$ 13,608.76 (~$2,691.99)",
-          "usd_price": 2691.99,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-29 17:57:37",
-          "price_raw": "R$ 13,608.76 (~$2,693.42)",
-          "usd_price": 2693.42,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-01 09:33:58",
-          "price_raw": "$1,849.99",
-          "usd_price": 1849.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC73 Keyboard Workstation",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122390303.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-01 12:34:14",
-          "price_raw": "$1,849.99",
-          "usd_price": 1849.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC73 Keyboard Workstation",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122390303.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-01 15:34:32",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-02 09:01:10",
-          "price_raw": "$1,849.99",
-          "usd_price": 1849.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC73 Keyboard Workstation",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122390303.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-02 12:01:25",
-          "price_raw": "$1,849.99",
-          "usd_price": 1849.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC73 Keyboard Workstation",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122390303.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-02 15:01:45",
-          "price_raw": "$1,849.99",
-          "usd_price": 1849.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC73 Keyboard Workstation",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122390303.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-02 18:01:48",
-          "price_raw": "$1,879.99",
-          "usd_price": 1879.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC73 Keyboard Workstation",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122394889.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-03 12:01:29",
-          "price_raw": "$1,879.99",
-          "usd_price": 1879.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC73 Keyboard Workstation",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122394889.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-03 15:01:42",
-          "price_raw": "$1,879.99",
-          "usd_price": 1879.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC73 Keyboard Workstation",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122394889.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-03 18:02:10",
-          "price_raw": "$1,879.99",
-          "usd_price": 1879.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC73 Keyboard Workstation",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122394889.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-05 09:34:59",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-05 12:35:03",
-          "price_raw": "R$ 13,674.10 (~$2,654.86)",
-          "usd_price": 2654.86,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-05 15:35:21",
-          "price_raw": "R$ 13,674.10 (~$2,649.92)",
-          "usd_price": 2649.92,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-08 10:13:56",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-08 13:13:32",
-          "price_raw": "R$ 13,955.44 (~$2,693.79)",
-          "usd_price": 2693.79,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-08 16:14:01",
-          "price_raw": "R$ 13,955.44 (~$2,692.85)",
-          "usd_price": 2692.85,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-09 09:42:48",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-09 12:43:09",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-09 15:43:19",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-09 18:43:20",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-09 21:43:34",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-10 09:16:28",
-          "price_raw": "R$ 13,967.32 (~$2,691.92)",
-          "usd_price": 2691.92,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-10 12:16:46",
-          "price_raw": "R$ 13,967.32 (~$2,687.57)",
-          "usd_price": 2687.57,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-10 15:17:03",
-          "price_raw": "R$ 13,967.32 (~$2,693.07)",
-          "usd_price": 2693.07,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-10 18:17:32",
-          "price_raw": "R$ 13,967.32 (~$2,689.44)",
-          "usd_price": 2689.44,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-10 21:17:46",
-          "price_raw": "R$ 13,967.32 (~$2,690.16)",
-          "usd_price": 2690.16,
-          "retailer": "eBay",
-          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
-          "link": "https://www.ebay.com/itm/206212699629",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-11 09:37:13",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-11 12:37:38",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-11 15:38:06",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-11 18:38:35",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-06-15 09:54:17",
-          "price_raw": "$2,699.99",
-          "usd_price": 2699.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC73 73-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
-          "status": "Searching..."
-        }
-      ]
-    },
-    "yamaha-yc61": {
-      "name": "Yamaha YC61",
-      "currency": "USD",
-      "active": false,
-      "target_price": 1800.0,
-      "best_deal": {
-        "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-        "price": 1584.4188208302842,
-        "price_str": "R$ 8,010.98 (~$1,584.42)",
-        "link": "https://www.ebay.com/itm/177946794325",
-        "source": "eBay"
-      },
-      "deals": [
-        {
-          "date": "2026-05-21 16:27:32",
-          "price_raw": "$2,099.99",
-          "usd_price": 2099.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC61 61-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC61--yamaha-yc61-61-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-21 17:31:38",
-          "price_raw": "R$ 7,973.00 (~$1,589.89)",
-          "usd_price": 1589.89,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-22 09:44:58",
-          "price_raw": "$2,099.99",
-          "usd_price": 2099.99,
-          "retailer": "Sweetwater",
-          "title": "Yamaha YC61 61-key Stage Keyboard",
-          "link": "https://www.sweetwater.com/store/detail/YC61--yamaha-yc61-61-key-stage-keyboard",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-05-22 12:05:35",
-          "price_raw": "R$ 7,980.34 (~$1,584.06)",
-          "usd_price": 1584.06,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-22 12:09:13",
-          "price_raw": "R$ 7,980.34 (~$1,583.31)",
-          "usd_price": 1583.31,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-22 14:01:37",
-          "price_raw": "R$ 7,980.34 (~$1,584.50)",
-          "usd_price": 1584.5,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-22 17:01:46",
-          "price_raw": "R$ 7,980.34 (~$1,583.43)",
-          "usd_price": 1583.43,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-25 14:40:01",
-          "price_raw": "R$ 7,117.13 (~$1,421.98)",
-          "usd_price": 1421.98,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-25 17:40:06",
-          "price_raw": "R$ 7,117.13 (~$1,418.46)",
-          "usd_price": 1418.46,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-26 09:01:02",
-          "price_raw": "R$ 7,089.86 (~$1,413.62)",
-          "usd_price": 1413.62,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-26 12:01:19",
-          "price_raw": "R$ 7,089.86 (~$1,408.79)",
-          "usd_price": 1408.79,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-26 15:01:35",
-          "price_raw": "R$ 7,089.86 (~$1,407.75)",
-          "usd_price": 1407.75,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-26 18:01:47",
-          "price_raw": "R$ 7,089.86 (~$1,405.44)",
-          "usd_price": 1405.44,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-27 08:43:27",
-          "price_raw": "R$ 7,113.17 (~$1,413.87)",
-          "usd_price": 1413.87,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-27 11:43:32",
-          "price_raw": "R$ 7,113.17 (~$1,401.03)",
-          "usd_price": 1401.03,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-27 14:43:51",
-          "price_raw": "R$ 7,113.17 (~$1,401.97)",
-          "usd_price": 1401.97,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-27 17:44:01",
-          "price_raw": "R$ 7,113.17 (~$1,402.44)",
-          "usd_price": 1402.44,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-28 09:11:42",
-          "price_raw": "R$ 7,149.06 (~$1,415.06)",
-          "usd_price": 1415.06,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-28 12:11:52",
-          "price_raw": "R$ 7,149.06 (~$1,413.98)",
-          "usd_price": 1413.98,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-28 15:12:21",
-          "price_raw": "R$ 7,149.06 (~$1,418.15)",
-          "usd_price": 1418.15,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-29 08:57:56",
-          "price_raw": "R$ 7,122.50 (~$1,412.63)",
-          "usd_price": 1412.63,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-29 11:58:05",
-          "price_raw": "R$ 7,122.50 (~$1,404.94)",
-          "usd_price": 1404.94,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-29 14:58:23",
-          "price_raw": "R$ 7,122.50 (~$1,408.92)",
-          "usd_price": 1408.92,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-05-29 17:58:23",
-          "price_raw": "R$ 7,122.50 (~$1,409.67)",
-          "usd_price": 1409.67,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-01 09:34:44",
-          "price_raw": "R$ 7,116.00 (~$1,410.67)",
-          "usd_price": 1410.67,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-01 12:35:05",
-          "price_raw": "R$ 7,116.00 (~$1,411.20)",
-          "usd_price": 1411.2,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-01 15:35:19",
-          "price_raw": "R$ 7,116.00 (~$1,413.81)",
-          "usd_price": 1413.81,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-02 09:01:56",
-          "price_raw": "R$ 7,103.42 (~$1,415.95)",
-          "usd_price": 1415.95,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-02 12:02:11",
-          "price_raw": "R$ 7,103.42 (~$1,414.94)",
-          "usd_price": 1414.94,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-02 15:02:33",
-          "price_raw": "R$ 7,103.42 (~$1,410.89)",
-          "usd_price": 1410.89,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-02 18:02:34",
-          "price_raw": "R$ 7,103.42 (~$1,415.39)",
-          "usd_price": 1415.39,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-03 09:01:36",
-          "price_raw": "R$ 7,072.62 (~$1,412.89)",
-          "usd_price": 1412.89,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-03 12:02:15",
-          "price_raw": "R$ 7,072.62 (~$1,399.30)",
-          "usd_price": 1399.3,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-03 15:02:28",
-          "price_raw": "R$ 7,072.62 (~$1,389.73)",
-          "usd_price": 1389.73,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-03 18:02:56",
-          "price_raw": "R$ 7,072.62 (~$1,392.77)",
-          "usd_price": 1392.77,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
-          "link": "https://www.ebay.com/itm/306643294533",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-05 09:35:46",
-          "price_raw": "R$ 8,019.53 (~$1,584.23)",
-          "usd_price": 1584.23,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-05 12:35:50",
-          "price_raw": "R$ 8,019.53 (~$1,557.01)",
-          "usd_price": 1557.01,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-05 15:36:08",
-          "price_raw": "R$ 8,019.53 (~$1,554.11)",
-          "usd_price": 1554.11,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-08 10:14:42",
-          "price_raw": "R$ 8,184.53 (~$1,585.17)",
-          "usd_price": 1585.17,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-08 13:14:19",
-          "price_raw": "R$ 8,184.53 (~$1,579.84)",
-          "usd_price": 1579.84,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-08 16:14:49",
-          "price_raw": "R$ 8,184.53 (~$1,579.29)",
-          "usd_price": 1579.29,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-09 09:43:35",
-          "price_raw": "R$ 8,223.33 (~$1,586.78)",
-          "usd_price": 1586.78,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-09 12:43:56",
-          "price_raw": "R$ 8,223.33 (~$1,586.78)",
-          "usd_price": 1586.78,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-09 15:44:05",
-          "price_raw": "R$ 8,223.33 (~$1,584.98)",
-          "usd_price": 1584.98,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-09 18:44:07",
-          "price_raw": "R$ 8,223.33 (~$1,584.70)",
-          "usd_price": 1584.7,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-09 21:44:21",
-          "price_raw": "R$ 8,223.33 (~$1,584.37)",
-          "usd_price": 1584.37,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-10 09:17:15",
-          "price_raw": "R$ 8,191.50 (~$1,578.75)",
-          "usd_price": 1578.75,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-10 12:17:33",
-          "price_raw": "R$ 8,191.50 (~$1,576.20)",
-          "usd_price": 1576.2,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-10 15:17:49",
-          "price_raw": "R$ 8,191.50 (~$1,579.42)",
-          "usd_price": 1579.42,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-10 18:18:19",
-          "price_raw": "$1,499.99",
-          "usd_price": 1499.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC61 Stage Piano",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-10 21:18:33",
-          "price_raw": "$1,499.99",
-          "usd_price": 1499.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC61 Stage Piano",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-11 09:38:00",
-          "price_raw": "$1,499.99",
-          "usd_price": 1499.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC61 Stage Piano",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-11 12:38:24",
-          "price_raw": "$1,499.99",
-          "usd_price": 1499.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC61 Stage Piano",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-11 15:38:52",
-          "price_raw": "$1,499.99",
-          "usd_price": 1499.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC61 Stage Piano",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-11 18:39:21",
-          "price_raw": "$1,499.99",
-          "usd_price": 1499.99,
-          "retailer": "Guitar Center",
-          "title": "Used Yamaha YC61 Stage Piano",
-          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-06-15 09:55:04",
-          "price_raw": "R$ 8,010.98 (~$1,584.42)",
-          "usd_price": 1584.42,
-          "retailer": "eBay",
-          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
-          "link": "https://www.ebay.com/itm/177946794325",
-          "status": "TARGET MET!"
-        }
-      ]
-    },
-    "pneu-michelin-20555-r16": {
-      "name": "Pneu Michelin 205/55 R16",
-      "currency": "BRL",
-      "active": true,
-      "target_price": 450.0,
-      "best_deal": {
-        "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
-        "price": 286.68,
-        "price_str": "R$ 286.68",
-        "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=25&amp;type=product&amp;tracking_id=31178286-bc38-4504-b8f0-3f76ca8c7c05&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
-        "source": "Mercado Livre"
-      },
-      "deals": [
-        {
-          "date": "2026-09-14 14:13:59",
-          "price_raw": "R$ 286.99",
-          "usd_price": 286.99,
-          "retailer": "Mercado Livre",
-          "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
-          "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=49&amp;type=product&amp;tracking_id=73c458d9-3a1e-4033-9a0b-723262620e5f&amp;wid=MLB4033669827&amp;sid=search",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-09-14 16:04:42",
-          "price_raw": "N/A",
-          "usd_price": null,
-          "retailer": "None",
-          "title": "No items found",
-          "link": "N/A",
-          "status": "Searching..."
-        },
-        {
-          "date": "2026-09-14 16:07:38",
-          "price_raw": "R$ 286.99",
-          "usd_price": 286.99,
-          "retailer": "Mercado Livre",
-          "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
-          "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=20&amp;type=product&amp;tracking_id=5437dc90-29b8-4f97-bc45-d098d5b33a0f&amp;wid=MLB4033669827&amp;sid=search",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-09-14 17:37:23",
-          "price_raw": "R$ 286.99",
-          "usd_price": 286.99,
-          "retailer": "Mercado Livre",
-          "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
-          "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=20&amp;type=product&amp;tracking_id=50714157-d3eb-446a-a5b7-cb9e863a6d63&amp;wid=MLB4033669827&amp;sid=search",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-10-30 17:37:49",
-          "price_raw": "R$ 286.68",
-          "usd_price": 286.68,
-          "retailer": "Mercado Livre",
-          "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
-          "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=25&amp;type=product&amp;tracking_id=2a59cca5-5403-45e8-bdb3-d3cf78d9f0c0&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
-          "status": "TARGET MET!"
-        },
-        {
-          "date": "2026-10-30 17:40:45",
-          "price_raw": "R$ 286.68",
-          "usd_price": 286.68,
-          "retailer": "Mercado Livre",
-          "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
-          "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=25&amp;type=product&amp;tracking_id=31178286-bc38-4504-b8f0-3f76ca8c7c05&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
-          "status": "TARGET MET!"
-        }
-      ]
-    },
-    "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera": {
-      "name": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
-      "currency": "BRL",
-      "active": true,
-      "target_price": 500.0,
-      "best_deal": {
-        "title": "Hollyland Microfone Sem Fio Duplo Lark M2 Usb-c Para iPhone Cor Preto",
-        "price": 593.9,
-        "price_str": "R$ 593.90",
-        "link": "https://www.mercadolivre.com.br/hollyland-microfone-sem-fio-duplo-lark-m2-usb-c-para-iphone-cor-preto/p/MLB46342327#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=grid&amp;position=11&amp;type=product&amp;tracking_id=51e0d9b9-de7f-4bc7-b8a7-3881d5f07028&amp;overlay_label_capability=not_apply&amp;wid=MLB6297028988&amp;sid=search",
-        "source": "Mercado Livre"
-      },
-      "deals": [
-        {
-          "date": "2026-10-30 17:41:22",
-          "price_raw": "R$ 593.90",
-          "usd_price": 593.9,
-          "retailer": "Mercado Livre",
-          "title": "Hollyland Microfone Sem Fio Duplo Lark M2 Usb-c Para iPhone Cor Preto",
-          "link": "https://www.mercadolivre.com.br/hollyland-microfone-sem-fio-duplo-lark-m2-usb-c-para-iphone-cor-preto/p/MLB46342327#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=grid&amp;position=11&amp;type=product&amp;tracking_id=51e0d9b9-de7f-4bc7-b8a7-3881d5f07028&amp;overlay_label_capability=not_apply&amp;wid=MLB6297028988&amp;sid=search",
-          "status": "Searching..."
-        }
-      ]
-    }
-  },
-  "usd_to_brl_rate": 5.4444,
-  "last_search_time": "2026-10-30 17:40:30",
-  "search_interval": "3h"
-};
+        const encryptedPayload = {"salt": "92MmKHnbImOeE+cCDZkcDw==", "iv": "nbIVhNGyyUtLHwWB", "ciphertext": "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"};
+        let embeddedData = null;
         let chartInstance = null;
         let selectedCurrency = 'BRL';
+        
+        async function decryptPayload(pin, payload) {
+            const salt = Uint8Array.from(atob(payload.salt), c => c.charCodeAt(0));
+            const iv = Uint8Array.from(atob(payload.iv), c => c.charCodeAt(0));
+            const ciphertext = Uint8Array.from(atob(payload.ciphertext), c => c.charCodeAt(0));
+
+            const keyMaterial = await crypto.subtle.importKey(
+                "raw",
+                new TextEncoder().encode(pin),
+                { name: "PBKDF2" },
+                false,
+                ["deriveKey"]
+            );
+
+            const key = await crypto.subtle.deriveKey(
+                { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+                keyMaterial,
+                { name: "AES-GCM", length: 256 },
+                false,
+                ["decrypt"]
+            );
+
+            const decrypted = await crypto.subtle.decrypt(
+                { name: "AES-GCM", iv },
+                key,
+                ciphertext
+            );
+
+            return JSON.parse(new TextDecoder().decode(decrypted));
+        }
+        
+        async function attemptUnlock(pin, remember) {
+            const errorEl = document.getElementById('pin-error-msg');
+            const btnUnlock = document.getElementById('btn-unlock-pin');
+            if (errorEl) errorEl.style.display = 'none';
+            if (btnUnlock) {
+                btnUnlock.disabled = true;
+                btnUnlock.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verificando...';
+            }
+            
+            try {
+                const data = await decryptPayload(pin, encryptedPayload);
+                embeddedData = data;
+                
+                if (remember) {
+                    localStorage.setItem('caca_precos_pin', pin);
+                }
+                
+                const lockOverlay = document.getElementById('pin-lock-overlay');
+                if (lockOverlay) {
+                    lockOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        lockOverlay.style.display = 'none';
+                    }, 300);
+                }
+                
+                const mainContainer = document.getElementById('main-app-container');
+                if (mainContainer) mainContainer.style.display = 'block';
+                
+                initSelector();
+                setCurrencySelection('BRL');
+                checkSearchStatus();
+                return true;
+            } catch (err) {
+                if (errorEl) errorEl.style.display = 'block';
+                if (btnUnlock) {
+                    btnUnlock.disabled = false;
+                    btnUnlock.innerHTML = '<i class="fa-solid fa-lock-open"></i> Entrar';
+                }
+                const inputPin = document.getElementById('input-pin');
+                if (inputPin) {
+                    inputPin.value = '';
+                    inputPin.focus();
+                }
+                return false;
+            }
+        }
+        
+        function handlePinSubmit(e) {
+            e.preventDefault();
+            const pin = document.getElementById('input-pin').value.trim();
+            const remember = document.getElementById('cb-remember').checked;
+            if (!pin) return;
+            attemptUnlock(pin, remember);
+        }
+        
+        function lockSession() {
+            localStorage.removeItem('caca_precos_pin');
+            window.location.reload();
+        }
         
         const STORE_PRESETS = {
             'BRL': [
@@ -2920,10 +1764,14 @@ Clique em Cancelar para MANTER o histórico arquivado.`);
             }
         });
         
-        document.addEventListener('DOMContentLoaded', () => {
-            initSelector();
-            setCurrencySelection('BRL');
-            checkSearchStatus();
+        document.addEventListener('DOMContentLoaded', async () => {
+            const savedPin = localStorage.getItem('caca_precos_pin');
+            if (savedPin) {
+                const success = await attemptUnlock(savedPin, true);
+                if (!success) {
+                    localStorage.removeItem('caca_precos_pin');
+                }
+            }
         });
     </script>
 </body>

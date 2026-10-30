@@ -8,6 +8,10 @@ import socket
 import time
 import threading
 import unicodedata
+import base64
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
 from urllib.parse import quote_plus, unquote
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
@@ -982,6 +986,19 @@ def format_datetime_br(dt_str):
     except Exception:
         return dt_str
 
+def encrypt_data_payload(json_str, pin):
+    salt = os.urandom(16)
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=100000)
+    key = kdf.derive(pin.encode("utf-8"))
+    aesgcm = AESGCM(key)
+    iv = os.urandom(12)
+    ciphertext = aesgcm.encrypt(iv, json_str.encode("utf-8"), None)
+    return {
+        "salt": base64.b64encode(salt).decode("utf-8"),
+        "iv": base64.b64encode(iv).decode("utf-8"),
+        "ciphertext": base64.b64encode(ciphertext).decode("utf-8")
+    }
+
 def generate_dashboard():
     try:
         with open(DATA_JSON_FILE, 'r') as f:
@@ -993,6 +1010,11 @@ def generate_dashboard():
     unified_data = json.loads(unified_data_json_str)
     last_search_raw = unified_data.get("last_search_time", "N/A")
     last_search_time_formatted = format_datetime_br(last_search_raw)
+    
+    config = load_config()
+    access_pin = str(config.get("access_pin", "140608"))
+    encrypted_payload = encrypt_data_payload(unified_data_json_str, access_pin)
+    encrypted_payload_json = json.dumps(encrypted_payload)
     
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -1583,7 +1605,38 @@ def generate_dashboard():
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- PIN Lock Screen Overlay -->
+    <div id="pin-lock-overlay" style="position: fixed; inset: 0; z-index: 9999; background: #0f172a; background-image: radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.25) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.25) 0px, transparent 50%); display: flex; align-items: center; justify-content: center; padding: 1.5rem; transition: opacity 0.3s ease, visibility 0.3s ease;">
+        <div style="width: 100%; max-width: 400px; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 2.5rem 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); text-align: center;">
+            <div style="width: 64px; height: 64px; margin: 0 auto 1.25rem; border-radius: 50%; background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2)); border: 1px solid rgba(139, 92, 246, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; color: #a78bfa; box-shadow: 0 0 20px rgba(139, 92, 246, 0.25);">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">Caça-Preços Web</h2>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.75rem;">Acesso Familiar Restrito</p>
+            
+            <form id="form-pin-lock" onsubmit="handlePinSubmit(event);">
+                <div style="margin-bottom: 1.25rem;">
+                    <label for="input-pin" style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 0.6rem;">Digite o PIN de 6 dígitos</label>
+                    <input type="password" id="input-pin" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" autofocus placeholder="••••••" style="width: 100%; padding: 0.9rem; text-align: center; font-size: 1.6rem; letter-spacing: 0.6rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(15, 23, 42, 0.6); color: #fff; outline: none; font-family: monospace; transition: all 0.2s;" onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 3px rgba(139, 92, 246, 0.2)';" onblur="this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
+                </div>
+                
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;" onclick="const cb = document.getElementById('cb-remember'); cb.checked = !cb.checked;">
+                    <input type="checkbox" id="cb-remember" checked onclick="event.stopPropagation();" style="accent-color: var(--accent-primary); width: 16px; height: 16px; cursor: pointer;">
+                    <span>Lembrar neste aparelho</span>
+                </div>
+                
+                <button type="submit" id="btn-unlock-pin" style="width: 100%; padding: 0.85rem; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: transform 0.1s, opacity 0.2s; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);">
+                    <i class="fa-solid fa-lock-open"></i> Entrar
+                </button>
+                
+                <div id="pin-error-msg" style="display: none; margin-top: 1rem; padding: 0.6rem; border-radius: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-size: 0.85rem;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> PIN incorreto. Tente novamente.
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="container" id="main-app-container" style="display: none;">
         <header>
             <div class="title-area">
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 0.5rem;">
@@ -1606,12 +1659,15 @@ def generate_dashboard():
                 </div>
                 <p>Monitorando: <strong id="header-product-title" style="color: var(--accent-secondary); font-weight: 700;">Carregando...</strong> &bull; Rastreador Inteligente em Tempo Real</p>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <a href="#" onclick="window.location.reload();" class="btn-action btn-refresh">
                     <i class="fa-solid fa-rotate-right"></i> Atualizar
                 </a>
                 <button id="btn-new-search" class="btn-action btn-search-trigger">
                     <i class="fa-solid fa-magnifying-glass"></i> Buscar Agora
+                </button>
+                <button id="btn-lock-session" onclick="lockSession();" class="btn-action" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); font-weight: 600;" title="Bloquear e sair">
+                    <i class="fa-solid fa-lock"></i> Sair
                 </button>
             </div>
         </header>
@@ -1862,9 +1918,100 @@ def generate_dashboard():
     </div>
     
     <script>
-        const embeddedData = {unified_data_json_str};
+        const encryptedPayload = {encrypted_payload_json};
+        let embeddedData = null;
         let chartInstance = null;
         let selectedCurrency = 'BRL';
+        
+        async function decryptPayload(pin, payload) {{
+            const salt = Uint8Array.from(atob(payload.salt), c => c.charCodeAt(0));
+            const iv = Uint8Array.from(atob(payload.iv), c => c.charCodeAt(0));
+            const ciphertext = Uint8Array.from(atob(payload.ciphertext), c => c.charCodeAt(0));
+
+            const keyMaterial = await crypto.subtle.importKey(
+                "raw",
+                new TextEncoder().encode(pin),
+                {{ name: "PBKDF2" }},
+                false,
+                ["deriveKey"]
+            );
+
+            const key = await crypto.subtle.deriveKey(
+                {{ name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" }},
+                keyMaterial,
+                {{ name: "AES-GCM", length: 256 }},
+                false,
+                ["decrypt"]
+            );
+
+            const decrypted = await crypto.subtle.decrypt(
+                {{ name: "AES-GCM", iv }},
+                key,
+                ciphertext
+            );
+
+            return JSON.parse(new TextDecoder().decode(decrypted));
+        }}
+        
+        async function attemptUnlock(pin, remember) {{
+            const errorEl = document.getElementById('pin-error-msg');
+            const btnUnlock = document.getElementById('btn-unlock-pin');
+            if (errorEl) errorEl.style.display = 'none';
+            if (btnUnlock) {{
+                btnUnlock.disabled = true;
+                btnUnlock.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verificando...';
+            }}
+            
+            try {{
+                const data = await decryptPayload(pin, encryptedPayload);
+                embeddedData = data;
+                
+                if (remember) {{
+                    localStorage.setItem('caca_precos_pin', pin);
+                }}
+                
+                const lockOverlay = document.getElementById('pin-lock-overlay');
+                if (lockOverlay) {{
+                    lockOverlay.style.opacity = '0';
+                    setTimeout(() => {{
+                        lockOverlay.style.display = 'none';
+                    }}, 300);
+                }}
+                
+                const mainContainer = document.getElementById('main-app-container');
+                if (mainContainer) mainContainer.style.display = 'block';
+                
+                initSelector();
+                setCurrencySelection('BRL');
+                checkSearchStatus();
+                return true;
+            }} catch (err) {{
+                if (errorEl) errorEl.style.display = 'block';
+                if (btnUnlock) {{
+                    btnUnlock.disabled = false;
+                    btnUnlock.innerHTML = '<i class="fa-solid fa-lock-open"></i> Entrar';
+                }}
+                const inputPin = document.getElementById('input-pin');
+                if (inputPin) {{
+                    inputPin.value = '';
+                    inputPin.focus();
+                }}
+                return false;
+            }}
+        }}
+        
+        function handlePinSubmit(e) {{
+            e.preventDefault();
+            const pin = document.getElementById('input-pin').value.trim();
+            const remember = document.getElementById('cb-remember').checked;
+            if (!pin) return;
+            attemptUnlock(pin, remember);
+        }}
+        
+        function lockSession() {{
+            localStorage.removeItem('caca_precos_pin');
+            window.location.reload();
+        }}
         
         const STORE_PRESETS = {{
             'BRL': [
@@ -2632,10 +2779,14 @@ def generate_dashboard():
             }}
         }});
         
-        document.addEventListener('DOMContentLoaded', () => {{
-            initSelector();
-            setCurrencySelection('BRL');
-            checkSearchStatus();
+        document.addEventListener('DOMContentLoaded', async () => {{
+            const savedPin = localStorage.getItem('caca_precos_pin');
+            if (savedPin) {{
+                const success = await attemptUnlock(savedPin, true);
+                if (!success) {{
+                    localStorage.removeItem('caca_precos_pin');
+                }}
+            }}
         }});
     </script>
 </body>
