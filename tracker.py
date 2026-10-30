@@ -2365,6 +2365,8 @@ def generate_dashboard():
                 return;
             }}
             
+            const currentDefault = localStorage.getItem('caca_precos_default_product') || embeddedData.default_product || (productIds.find(pid => embeddedData.products[pid].active !== false) || productIds[0]);
+            
             productIds.forEach(id => {{
                 const p = embeddedData.products[id];
                 const isBrl = p.currency === 'BRL';
@@ -2382,18 +2384,26 @@ def generate_dashboard():
                 const currBadge = isBrl ? '<span class="badge-curr brl">R$ BRL</span>' : '<span class="badge-curr usd">US$ USD</span>';
                 const targetDisplay = (isBrl ? 'R$ ' : '$') + (p.target_price || 0).toLocaleString('pt-BR');
                 const isAct = p.active !== false;
+                const isDefault = (id === currentDefault);
                 
                 row.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <div>
-                            <div style="font-weight: 700; font-size: 1rem; color: #fff; font-family: 'Outfit', sans-serif;">${{p.name}}</div>
-                            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                <span style="font-weight: 700; font-size: 1rem; color: #fff; font-family: 'Outfit', sans-serif;">${{p.name}}</span>
+                                ${{isDefault ? '<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); padding: 0.15rem 0.5rem; border-radius: 6px;"><i class="fa-solid fa-star"></i> Padrão</span>' : ''}}
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem; flex-wrap: wrap;">
                                 ${{currBadge}}
                                 <span style="font-size: 0.8rem; color: var(--text-secondary);">Alvo: <b>${{targetDisplay}}</b></span>
                             </div>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+                        <button type="button" onclick="setDefaultProduct('${{id}}')" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.85rem; border-radius: 9px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; ${{isDefault ? 'background: rgba(139, 92, 246, 0.25); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.6);' : 'background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); border: 1px solid rgba(255, 255, 255, 0.12);'}}" title="Definir para o app sempre abrir com esse produto">
+                            <i class="${{isDefault ? 'fa-solid fa-star' : 'fa-regular fa-star'}}" style="${{isDefault ? 'color: #fbbf24;' : ''}}"></i>
+                            <span>${{isDefault ? 'Abrindo por padrão' : 'Abrir com esse produto'}}</span>
+                        </button>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="font-size: 0.8rem; color: ${{isAct ? 'var(--accent-green)' : 'var(--text-secondary)'}}; font-weight: 600;">${{isAct ? 'Ativo' : 'Pausado'}}</span>
                             <label class="switch">
@@ -2408,6 +2418,34 @@ def generate_dashboard():
                 `;
                 listContainer.appendChild(row);
             }});
+        }}
+        
+        async function setDefaultProduct(productId) {{
+            localStorage.setItem('caca_precos_default_product', productId);
+            if (embeddedData) {{
+                embeddedData.default_product = productId;
+            }}
+            renderManageList();
+            
+            const select = document.getElementById('product-select');
+            if (select) {{
+                select.value = productId;
+            }}
+            renderProduct(productId);
+            
+            try {{
+                await fetch('/api/products/set-default', {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify({{ product_id: productId }})
+                }});
+            }} catch (e) {{
+                // static GitHub Pages
+            }}
+            
+            setTimeout(() => {{
+                closeManageModal();
+            }}, 350);
         }}
         
         async function toggleProductActive(productId, activeState) {{
@@ -2505,7 +2543,18 @@ def generate_dashboard():
             }}
             
             if (productIds.length > 0) {{
-                renderProduct(productIds[0]);
+                const savedDefault = localStorage.getItem('caca_precos_default_product');
+                let initialProduct = null;
+                if (savedDefault && productIds.includes(savedDefault)) {{
+                    initialProduct = savedDefault;
+                }} else if (embeddedData.default_product && productIds.includes(embeddedData.default_product)) {{
+                    initialProduct = embeddedData.default_product;
+                }} else {{
+                    const firstActive = productIds.find(id => embeddedData.products[id].active !== false);
+                    initialProduct = firstActive || productIds[0];
+                }}
+                select.value = initialProduct;
+                renderProduct(initialProduct);
             }}
         }}
         
@@ -2894,7 +2943,8 @@ def run_tracker():
         "products": {},
         "usd_to_brl_rate": rate,
         "last_search_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "search_interval": config.get("search_interval", "14:00_17:30")
+        "search_interval": config.get("search_interval", "14:00_17:30"),
+        "default_product": config.get("default_product")
     }
     
     # Load existing data.json to preserve inactive products and history
@@ -2904,6 +2954,8 @@ def run_tracker():
                 old_data = json.load(f)
                 if "products" in old_data:
                     unified_data["products"] = old_data["products"]
+                if "default_product" in old_data and not unified_data.get("default_product"):
+                    unified_data["default_product"] = old_data["default_product"]
         except Exception as e:
             print(f"Warning reading existing data.json: {e}")
             
@@ -3105,6 +3157,31 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     self.wfile.write(json.dumps({'status': 'success'}).encode('utf-8'))
                 else:
                     self.wfile.write(json.dumps({'status': 'error', 'message': 'Produto não encontrado'}).encode('utf-8'))
+            except Exception as e:
+                self.wfile.write(json.dumps({'status': 'error', 'message': str(e)}).encode('utf-8'))
+        elif self.path == '/api/products/set-default':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            try:
+                params = json.loads(post_data.decode('utf-8'))
+                product_id = params.get("product_id")
+                if product_id:
+                    config = load_config()
+                    config["default_product"] = product_id
+                    save_config(config)
+                    if os.path.exists(DATA_JSON_FILE):
+                        with open(DATA_JSON_FILE, 'r') as f:
+                            djson = json.load(f)
+                        djson['default_product'] = product_id
+                        with open(DATA_JSON_FILE, 'w') as f:
+                            json.dump(djson, f, indent=2)
+                    generate_dashboard()
+                    git_push_update()
+                    self.wfile.write(json.dumps({'status': 'success', 'default_product': product_id}).encode('utf-8'))
+                else:
+                    self.wfile.write(json.dumps({'status': 'error', 'message': 'Missing product_id'}).encode('utf-8'))
             except Exception as e:
                 self.wfile.write(json.dumps({'status': 'error', 'message': str(e)}).encode('utf-8'))
         elif self.path == '/update-target-price':

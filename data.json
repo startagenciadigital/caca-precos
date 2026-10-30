@@ -1296,5 +1296,6 @@
   },
   "usd_to_brl_rate": 5.4387,
   "last_search_time": "2026-10-30 18:04:44",
-  "search_interval": "3h"
+  "search_interval": "3h",
+  "default_product": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera"
 }
