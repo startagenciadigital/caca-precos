@@ -1023,6 +1023,12 @@ def generate_dashboard():
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caça-Preços Web</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='128' fill='%230f172a'/%3E%3Cg transform='translate(64, 64) scale(0.75)'%3E%3Cpath fill='%238b5cf6' d='M256 0c17.7 0 32 14.3 32 32l0 10.4c93.7 13.9 167.7 88 181.6 181.6l10.4 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-10.4 0c-13.9 93.7-88 167.7-181.6 181.6l0 10.4c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-10.4C130.3 455.7 56.3 381.7 42.4 288L32 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l10.4 0C56.3 130.3 130.3 56.3 224 42.4L224 32c0-17.7 14.3-32 32-32zM107.4 288c12.5 58.3 58.4 104.1 116.6 116.6l0-20.6c0-17.7 14.3-32 32-32s32 14.3 32 32l0 20.6c58.3-12.5 104.1-58.4 116.6-116.6L384 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l20.6 0C392.1 165.7 346.3 119.9 288 107.4l0 20.6c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-20.6C165.7 119.9 119.9 165.7 107.4 224l20.6 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-20.6 0zM256 224a32 32 0 1 1 0 64 32 32 0 1 1 0-64z'/%3E%3C/g%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="favicon.png">
+    
     <!-- Outfit & Inter Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2906,7 +2912,7 @@ def git_push_update():
             print("No remote origin 'origin' configured. Skipping auto git push.")
             return
             
-        subprocess.run(["git", "add", "dashboard.html", "index.html", "data.json", "products.json", "config.json", "deals.md"], cwd=base_dir)
+        subprocess.run(["git", "add", "dashboard.html", "index.html", "data.json", "products.json", "config.json", "deals.md", "favicon.svg", "favicon.ico", "favicon.png"], cwd=base_dir)
         subprocess.run(["git", "add", "deals_*.md"], cwd=base_dir)
         
         status_res = subprocess.run(["git", "status", "--porcelain"], cwd=base_dir, capture_output=True, text=True)
@@ -3261,6 +3267,20 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 'last_run': last_run_time
             }
             self.wfile.write(json.dumps(status).encode('utf-8'))
+        elif self.path in ('/favicon.ico', '/favicon.png', '/favicon.svg'):
+            fname = self.path.lstrip('/')
+            fpath = os.path.join(os.path.dirname(DASHBOARD_FILE), fname)
+            if os.path.exists(fpath):
+                ctype = 'image/svg+xml' if fname.endswith('.svg') else ('image/png' if fname.endswith('.png') else 'image/x-icon')
+                self.send_response(200)
+                self.send_header('Content-type', ctype)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                with open(fpath, 'rb') as f:
+                    self.wfile.write(f.read())
+            else:
+                self.send_response(404)
+                self.end_headers()
         else:
             self.send_response(404)
             self.end_headers()
