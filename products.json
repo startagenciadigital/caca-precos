@@ -1,0 +1,176 @@
+[
+  {
+    "id": "yamaha-yc73",
+    "name": "Yamaha YC73",
+    "currency": "USD",
+    "target_price": 2150.0,
+    "active": false,
+    "exclude_keywords": [
+      "cable",
+      "cord",
+      "magnet",
+      "stand",
+      "case",
+      "bag",
+      "dust cover",
+      "power adapter",
+      "manual",
+      "encoder",
+      "potentiometer",
+      "knob",
+      "pedal",
+      "power supply",
+      "footswitch",
+      "sheet music",
+      "adapter",
+      "dustcover",
+      "gig bag",
+      "gigbag",
+      "flight case",
+      "flightcase"
+    ],
+    "relevancy_keywords": [
+      "yc73",
+      "yc 73"
+    ],
+    "stores": {
+      "eBay": "https://www.ebay.com/sch/i.html?_nkw=yamaha+yc73&_sop=15",
+      "B&H Photo": "https://www.bhphotovideo.com/c/search?Ntt=yamaha+yc73",
+      "Best Buy": "https://www.bestbuy.com/site/searchpage.jsp?st=yamaha+yc73",
+      "Sweetwater": "https://www.sweetwater.com/store/search?s=yamaha+yc73",
+      "Guitar Center": "https://www.guitarcenter.com/search?Ntt=yamaha+yc73"
+    },
+    "search_queries": {
+      "eBay": "yamaha+yc73",
+      "B&H Photo": "yamaha+yc73",
+      "Best Buy": "yamaha+yc73",
+      "Sweetwater": "yamaha+yc73",
+      "Guitar Center": "yamaha+yc73"
+    }
+  },
+  {
+    "id": "yamaha-yc61",
+    "name": "Yamaha YC61",
+    "currency": "USD",
+    "target_price": 1800.0,
+    "active": false,
+    "exclude_keywords": [
+      "cable",
+      "cord",
+      "magnet",
+      "stand",
+      "case",
+      "bag",
+      "dust cover",
+      "power adapter",
+      "manual",
+      "encoder",
+      "potentiometer",
+      "knob",
+      "pedal",
+      "power supply",
+      "footswitch",
+      "sheet music",
+      "adapter",
+      "dustcover",
+      "gig bag",
+      "gigbag",
+      "flight case",
+      "flightcase"
+    ],
+    "relevancy_keywords": [
+      "yc61",
+      "yc 61"
+    ],
+    "stores": {
+      "eBay": "https://www.ebay.com/sch/i.html?_nkw=yamaha+yc61&_sop=15",
+      "B&H Photo": "https://www.bhphotovideo.com/c/search?Ntt=yamaha+yc61",
+      "Best Buy": "https://www.bestbuy.com/site/searchpage.jsp?st=yamaha+yc61",
+      "Sweetwater": "https://www.sweetwater.com/store/search?s=yamaha+yc61",
+      "Guitar Center": "https://www.guitarcenter.com/search?Ntt=yamaha+yc61"
+    },
+    "search_queries": {
+      "eBay": "yamaha+yc61",
+      "B&H Photo": "yamaha+yc61",
+      "Best Buy": "yamaha+yc61",
+      "Sweetwater": "yamaha+yc61",
+      "Guitar Center": "yamaha+yc61"
+    }
+  },
+  {
+    "id": "pneu-michelin-20555-r16",
+    "name": "Pneu Michelin 205/55 R16",
+    "currency": "BRL",
+    "target_price": 450.0,
+    "active": true,
+    "stores": {
+      "Mercado Livre": "https://lista.mercadolivre.com.br/pneu-michelin-205-55-r16",
+      "Google Shopping": "https://www.google.com/search?tbm=shop&q=pneu+michelin+205+55+r16&hl=pt-BR"
+    },
+    "search_queries": {
+      "Mercado Livre": "Pneu Michelin 205/55 R16",
+      "Google Shopping": "Pneu Michelin 205/55 R16"
+    },
+    "exclude_keywords": [
+      "cabo",
+      "fonte",
+      "adaptador",
+      "capa",
+      "suporte",
+      "manual",
+      "adesivo",
+      "case",
+      "bag"
+    ],
+    "relevancy_keywords": [
+      "pneu",
+      "michelin",
+      "205",
+      "r16"
+    ]
+  },
+  {
+    "id": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera",
+    "name": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
+    "currency": "BRL",
+    "target_price": 500.0,
+    "active": true,
+    "stores": {
+      "Mercado Livre": "https://lista.mercadolivre.com.br/Microfone%20de%20Lapela%20Sem%20Fio%20Hollyland%20Lark%20M2%20Combo%20(USB-C%2C%20Lightning%20e%20C%C3%A2mera)",
+      "Google Shopping": "https://www.google.com/search?tbm=shop&q=Microfone%20de%20Lapela%20Sem%20Fio%20Hollyland%20Lark%20M2%20Combo%20(USB-C%2C%20Lightning%20e%20C%C3%A2mera)&hl=pt-BR",
+      "Amazon Brasil": "https://www.amazon.com.br/s?k=Microfone%20de%20Lapela%20Sem%20Fio%20Hollyland%20Lark%20M2%20Combo%20(USB-C%2C%20Lightning%20e%20C%C3%A2mera)",
+      "Magalu": "https://www.magazineluiza.com.br/?q=Microfone%20de%20Lapela%20Sem%20Fio%20Hollyland%20Lark%20M2%20Combo%20(USB-C%2C%20Lightning%20e%20C%C3%A2mera)",
+      "Casas Bahia": "https://www.casasbahia.com.br/?q=Microfone%20de%20Lapela%20Sem%20Fio%20Hollyland%20Lark%20M2%20Combo%20(USB-C%2C%20Lightning%20e%20C%C3%A2mera)"
+    },
+    "search_queries": {
+      "Mercado Livre": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
+      "Google Shopping": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
+      "Amazon Brasil": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
+      "Magalu": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
+      "Casas Bahia": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)"
+    },
+    "exclude_keywords": [
+      "cabo",
+      "fonte",
+      "adaptador",
+      "capa",
+      "suporte",
+      "manual",
+      "adesivo",
+      "case",
+      "bag"
+    ],
+    "relevancy_keywords": [
+      "microfone",
+      "lapela",
+      "sem",
+      "fio",
+      "hollyland",
+      "lark",
+      "combo",
+      "usb",
+      "lightning",
+      "c\u00e2mera"
+    ]
+  }
+]

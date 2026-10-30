@@ -1,0 +1,2930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caça-Preços Web</title>
+    
+    <!-- Outfit & Inter Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.45);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #06b6d4;
+            --accent-green: #10b981;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            animation: fadeInDown 0.6s ease-out;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        
+        .title-area h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 30%, var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .title-area p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .grid-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.7s ease-out;
+        }
+        
+        .card-stat {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .card-stat:hover {
+            transform: translateY(-5px);
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 10px 20px -10px rgba(139, 92, 246, 0.2);
+        }
+        
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(139, 92, 246, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-primary);
+            font-size: 1.25rem;
+        }
+        
+        .stat-icon.green {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+        }
+        
+        .stat-icon.cyan {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent-secondary);
+        }
+        
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .stat-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .grid-charts {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        @media (max-width: 900px) {
+            .grid-charts {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card-large {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.75rem;
+        }
+        
+        .card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title i {
+            color: var(--accent-primary);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .card-best-deal {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .deal-badge {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            width: fit-content;
+            margin-bottom: 1rem;
+        }
+        
+        .deal-price-area {
+            margin-bottom: 1.5rem;
+        }
+        
+        .deal-price {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+        
+        .deal-retailer {
+            color: var(--accent-secondary);
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .deal-title {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+        
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: #fff;
+            color: var(--bg-color);
+            padding: 0.85rem 1.5rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-action:hover {
+            background: var(--accent-primary);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+        }
+        
+        .btn-refresh {
+            padding: 0.5rem 1rem; 
+            font-size: 0.85rem; 
+            background: rgba(255,255,255,0.05); 
+            color: #fff; 
+            border: 1px solid var(--card-border); 
+            box-shadow: none;
+        }
+        
+        .btn-refresh:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        .btn-search-trigger {
+            padding: 0.5rem 1rem; 
+            font-size: 0.85rem; 
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: #fff;
+            border: none;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+        
+        .btn-search-trigger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4);
+        }
+        
+        .btn-search-trigger:disabled {
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            border: 1px solid var(--card-border);
+        }
+        
+        .card-table-area {
+            animation: fadeInUp 0.9s ease-out;
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        
+        th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        
+        tr {
+            transition: background 0.2s ease;
+        }
+        
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+            color: #fff;
+        }
+        
+        .source-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .source-badge.ebay { background: rgba(244, 180, 0, 0.15); color: #f4b400; }
+        .source-badge.sweetwater { background: rgba(6, 182, 212, 0.15); color: var(--accent-secondary); }
+        .source-badge.guitar { background: rgba(139, 92, 246, 0.15); color: var(--accent-primary); }
+        .source-badge.bh { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .source-badge.bestbuy { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .source-badge.none { background: rgba(148, 163, 184, 0.15); color: var(--text-secondary); }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-badge.met { color: var(--accent-green); }
+        .status-badge.searching { color: var(--text-secondary); }
+        
+        .link-icon {
+            color: var(--accent-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .link-icon:hover {
+            color: #fff;
+        }
+        
+        .last-search-sticker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.4rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-selector-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-selector-container label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        
+        .product-selector-container select {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+            padding-right: 0.5rem;
+        }
+        
+        .product-selector-container select option {
+            background: var(--bg-color);
+            color: #fff;
+        }
+        
+        .status-dot {
+            position: relative;
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+        }
+        
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+            animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        
+        @keyframes ping {
+            75%, 100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+        
+        /* Modal & Management Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            animation: fadeInDown 0.3s ease-out;
+        }
+        .modal-card {
+            background: #1e293b;
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+        }
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(30, 41, 59, 0.5);
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            background: rgba(139, 92, 246, 0.15);
+            color: #fff;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+        .btn-currency-toggle {
+            flex: 1;
+            padding: 0.65rem 0.5rem;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: rgba(15, 23, 42, 0.4);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-currency-toggle.active {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: var(--accent-primary);
+            color: #fff;
+        }
+        .badge-curr {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .badge-curr.brl { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .badge-curr.usd { background: rgba(6, 182, 212, 0.15); color: var(--accent-secondary); }
+        
+        /* Switch Toggle */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(148, 163, 184, 0.3);
+            transition: .3s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--accent-green);
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-area">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                    <h1 style="margin-bottom: 0; display: flex; align-items: center; gap: 0.6rem;">
+                        <i class="fa-solid fa-crosshairs" style="color: var(--accent-primary);"></i> Caça-Preços Web
+                    </h1>
+                    <div class="product-selector-container">
+                        <label for="product-select"><i class="fa-solid fa-box"></i> Produto:</label>
+                        <select id="product-select">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <button id="btn-open-manage" class="btn-action btn-refresh" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+                        <i class="fa-solid fa-list-check"></i> Gerenciar Produtos
+                    </button>
+                    <div class="last-search-sticker">
+                        <span id="product-active-indicator" class="status-dot"></span>
+                        <span>Última busca: 30/10/2026 às 17:40:30</span>
+                    </div>
+                </div>
+                <p>Monitorando: <strong id="header-product-title" style="color: var(--accent-secondary); font-weight: 700;">Carregando...</strong> &bull; Rastreador Inteligente em Tempo Real</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a href="#" onclick="window.location.reload();" class="btn-action btn-refresh">
+                    <i class="fa-solid fa-rotate-right"></i> Atualizar
+                </a>
+                <button id="btn-new-search" class="btn-action btn-search-trigger">
+                    <i class="fa-solid fa-magnifying-glass"></i> Buscar Agora
+                </button>
+            </div>
+        </header>
+
+        <!-- Status banner -->
+        <div id="search-status-banner" style="display: none; background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 1.25rem; margin-bottom: 2rem; align-items: center; justify-content: space-between; animation: fadeInUp 0.5s ease; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-primary);">
+                    <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 1.2rem;"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 600; color: #fff; font-family: 'Outfit', sans-serif;">Busca em Andamento...</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.15rem;">O Safari está rastreando ofertas nos sites configurados para cada produto ativo.</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Panel -->
+        <div class="card-large" style="margin-bottom: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; animation: fadeInUp 0.7s ease-out;">
+            <!-- Target Price Form -->
+            <div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-circle-dollar-to-slot" style="color: var(--accent-primary);"></i>
+                    <span>Preço-Alvo de Alerta</span>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div style="position: relative; flex-grow: 1;">
+                        <span id="target-currency-symbol" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 0.9rem; font-weight: 600;">$</span>
+                        <input type="number" id="input-target-price" step="10" min="1" style="width: 100%; padding: 0.6rem 0.6rem 0.6rem 28px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.4); color: #fff; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.95rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent-primary)'" onblur="this.style.borderColor='var(--card-border)'">
+                    </div>
+                    <button id="btn-save-price" class="btn-action" style="padding: 0.6rem 1.2rem; font-size: 0.85rem; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); box-shadow: none;">
+                        Salvar Preço
+                    </button>
+                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">
+                    <span id="target-price-brl" style="color: var(--accent-secondary); font-weight: 600;">-</span> (Dispara notificação quando atingido)
+                </div>
+            </div>
+            
+            <!-- Search Interval Form -->
+            <div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-clock" style="color: var(--accent-secondary);"></i>
+                    <span>Frequência de Rastreamento</span>
+                </div>
+                <div style="position: relative;">
+                    <select id="select-search-interval" style="width: 100%; padding: 0.6rem; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.4); color: #fff; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.95rem; outline: none; cursor: pointer;">
+                        <option value="14:00_17:30">Duas vezes ao dia (14:00 e 17:30)</option>
+                        <option value="1h">De 1 em 1 hora</option>
+                        <option value="3h">De 3 em 3 horas</option>
+                        <option value="6h">De 6 em 6 horas</option>
+                        <option value="12h">De 12 em 12 horas</option>
+                        <option value="manual">Manual (Apenas quando clicado)</option>
+                    </select>
+                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">
+                    Status do agendador: <span id="scheduler-status-text" style="color: var(--accent-green); font-weight: 600;">Ativo</span> <span id="save-interval-spinner" style="display:none; margin-left: 0.5rem; color: var(--accent-secondary);"><i class="fa-solid fa-circle-notch fa-spin"></i> salvando...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid-stats">
+            <a id="stat-current-card" class="card-stat">
+                <div class="stat-icon"><i class="fa-solid fa-tag"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Melhor Preço Atual</span>
+                    <span class="stat-val" id="stat-current">N/A</span>
+                    <span class="stat-subval" id="stat-current-brl" style="font-size: 0.9rem; color: var(--accent-secondary); font-weight: 600; margin-top: 0.15rem;">N/A</span>
+                </div>
+            </a>
+            <a id="stat-lowest-card" class="card-stat">
+                <div class="stat-icon green"><i class="fa-solid fa-arrow-down"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Menor Preço Histórico</span>
+                    <span class="stat-val" id="stat-lowest">N/A</span>
+                    <span class="stat-subval" id="stat-lowest-brl" style="font-size: 0.9rem; color: var(--accent-green); font-weight: 600; margin-top: 0.15rem;">N/A</span>
+                </div>
+            </a>
+            <div class="card-stat">
+                <div class="stat-icon" style="background: rgba(244, 180, 0, 0.15); color: #f4b400;"><i class="fa-solid fa-money-bill-transfer"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Dólar Hoje (USD/BRL)</span>
+                    <span class="stat-val" id="stat-rate">N/A</span>
+                    <span class="stat-subval" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.15rem;">Cotação do dia</span>
+                </div>
+            </div>
+            <div class="card-stat">
+                <div class="stat-icon cyan"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Total de Buscas</span>
+                    <span class="stat-val" id="stat-total">0</span>
+                    <span class="stat-subval" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.15rem;">Histórico completo</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid-charts">
+            <div class="card-large">
+                <div class="card-title">
+                    <span>Histórico de Preços (USD)</span>
+                    <i class="fa-solid fa-chart-area"></i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card-large card-best-deal">
+                <div>
+                    <div class="deal-badge">Melhor Oferta do Momento</div>
+                    <div class="deal-price-area">
+                        <div class="deal-price" id="offer-price">N/A</div>
+                        <div id="offer-price-brl" style="font-size: 1.3rem; color: var(--accent-secondary); font-weight: 700; margin-top: 0.25rem; margin-bottom: 0.75rem;">N/A</div>
+                        <div class="deal-retailer" id="offer-retailer">
+                            <i class="fa-solid fa-store"></i> -
+                        </div>
+                    </div>
+                    <div class="deal-title" id="offer-title">
+                        Carregando ofertas...
+                    </div>
+                </div>
+                <a id="offer-link-btn" target="_blank" class="btn-action" style="display: none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ir para a Oferta</a>
+            </div>
+        </div>
+        
+        <div class="card-large card-table-area">
+            <div class="card-title">
+                <span>Histórico Completo</span>
+                <i class="fa-solid fa-list"></i>
+            </div>
+            <div class="table-container">
+                <table id="history-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Preço</th>
+                            <th>Loja</th>
+                            <th>Detalhes</th>
+                            <th>Status</th>
+                            <th>Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Gerenciador de Produtos -->
+    <div id="modal-manage-products" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <button type="button" id="tab-btn-list" class="tab-btn active">
+                        <i class="fa-solid fa-boxes-stacked"></i> Produtos Cadastrados
+                    </button>
+                    <button type="button" id="tab-btn-new" class="tab-btn">
+                        <i class="fa-solid fa-circle-plus"></i> + Novo Produto
+                    </button>
+                </div>
+                <button type="button" id="modal-close-btn" style="background: none; border: none; color: var(--text-secondary); font-size: 1.3rem; cursor: pointer;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <!-- Tab 1: Product List -->
+            <div id="tab-content-list" style="padding: 1.5rem; overflow-y: auto; flex-grow: 1;">
+                <div id="manage-products-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <!-- Rendered dynamically by JS -->
+                </div>
+            </div>
+            
+            <!-- Tab 2: New Product Form -->
+            <div id="tab-content-new" style="display: none; padding: 1.5rem; overflow-y: auto; flex-grow: 1;">
+                <form id="form-new-product" style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600;">Nome do Produto:</label>
+                        <input type="text" id="new-prod-name" placeholder="Ex: Pneu Michelin 205/55 R16, Sony WH-1000XM5, iPhone 15..." required style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.6); color: #fff; font-size: 0.95rem; outline: none;">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600;">Tipo de Compra / Moeda:</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="button" id="btn-curr-brl" class="btn-currency-toggle active" onclick="setCurrencySelection('BRL')">
+                                    🇧🇷 Real (R$)
+                                </button>
+                                <button type="button" id="btn-curr-usd" class="btn-currency-toggle" onclick="setCurrencySelection('USD')">
+                                    🌐 Dólar (US$)
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600;">Preço-Alvo de Alerta:</label>
+                            <div style="position: relative;">
+                                <span id="new-prod-curr-symbol" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-weight: 600;">R$</span>
+                                <input type="number" id="new-prod-price" placeholder="Ex: 450.00" step="1" min="1" required style="width: 100%; padding: 0.65rem 0.65rem 0.65rem 36px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.6); color: #fff; font-size: 0.95rem; outline: none;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <label style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">Lojas para Monitorar:</label>
+                            <span id="stores-hint" style="font-size: 0.75rem; color: var(--accent-secondary);">Sugestões para compra nacional</span>
+                        </div>
+                        <div id="stores-checkboxes-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; background: rgba(15, 23, 42, 0.4); padding: 1rem; border-radius: 12px; border: 1px solid var(--card-border);">
+                            <!-- Populated dynamically based on currency -->
+                        </div>
+                    </div>
+                    
+                    <div id="custom-stores-container" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <!-- Custom stores added dynamically -->
+                    </div>
+                    <button type="button" id="btn-add-custom-store" style="background: none; border: 1px dashed rgba(6, 182, 212, 0.4); color: var(--accent-secondary); border-radius: 10px; padding: 0.6rem; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-plus"></i> Adicionar Outra Loja da Internet
+                    </button>
+                    
+                    <!-- Advanced Options (Collapsible) -->
+                    <div style="border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 0.75rem;">
+                        <button type="button" id="btn-toggle-advanced" style="background: none; border: none; color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-chevron-right" id="advanced-chevron"></i> Opções Avançadas (Filtros de Palavras-Chave)
+                        </button>
+                        <div id="advanced-options-panel" style="display: none; margin-top: 0.75rem; flex-direction: column; gap: 0.75rem;">
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary);">Palavras a Excluir (separadas por vírgula):</label>
+                                <input type="text" id="new-prod-exclude" placeholder="cabo, capa, suporte, manual, adesivo..." style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.4); color: #fff; font-size: 0.85rem;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary);">Palavras Obrigatórias de Relevância (separadas por vírgula):</label>
+                                <input type="text" id="new-prod-relevancy" placeholder="Deixe em branco para usar as palavras do nome do produto" style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.4); color: #fff; font-size: 0.85rem;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 0.5rem;">
+                        <button type="button" id="btn-cancel-new" class="btn-action btn-refresh">Cancelar</button>
+                        <button type="submit" id="btn-submit-new" class="btn-action" style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff;">
+                            Salvar e Ativar Monitoramento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const embeddedData = {
+  "products": {
+    "yamaha-yc73": {
+      "name": "Yamaha YC73",
+      "currency": "USD",
+      "active": false,
+      "target_price": 2150.0,
+      "best_deal": {
+        "title": "Yamaha YC73 73-key Stage Keyboard",
+        "price": 2699.99,
+        "price_str": "$2,699.99",
+        "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+        "source": "Sweetwater"
+      },
+      "deals": [
+        {
+          "date": "2026-05-20",
+          "price_raw": "~$2,599.99",
+          "usd_price": 2599.99,
+          "retailer": "Major Retailers",
+          "title": "Standard retail price. eBay listings hover around $2,699.",
+          "link": "N/A",
+          "status": "Started"
+        },
+        {
+          "date": "2026-05-20 11:40:09",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-20 11:40:12",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-20 11:51:33",
+          "price_raw": "R$ 13,630.09 (~$2,726.02)",
+          "usd_price": 2726.02,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-20 11:55:17",
+          "price_raw": "R$ 13,630.09 (~$2,726.02)",
+          "usd_price": 2726.02,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-20 11:56:45",
+          "price_raw": "R$ 13,630.09 (~$2,726.02)",
+          "usd_price": 2726.02,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-20 12:02:14",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-20 12:06:51",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-20 18:12:51",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 09:42:55",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 11:44:31",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 11:45:28",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 11:48:19",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 12:10:15",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 12:18:14",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 14:00:50",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 15:07:00",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 16:22:49",
+          "price_raw": "R$ 13,499.95 (~$2,694.28)",
+          "usd_price": 2694.28,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 16:26:47",
+          "price_raw": "R$ 13,499.95 (~$2,694.28)",
+          "usd_price": 2694.28,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 17:30:52",
+          "price_raw": "R$ 13,499.95 (~$2,692.02)",
+          "usd_price": 2692.02,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-22 09:44:08",
+          "price_raw": "R$ 13,512.37 (~$2,686.09)",
+          "usd_price": 2686.09,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-22 12:04:49",
+          "price_raw": "R$ 13,512.37 (~$2,682.14)",
+          "usd_price": 2682.14,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-22 12:08:27",
+          "price_raw": "R$ 13,512.37 (~$2,680.87)",
+          "usd_price": 2680.87,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-22 14:00:51",
+          "price_raw": "R$ 13,512.37 (~$2,682.89)",
+          "usd_price": 2682.89,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-22 17:01:00",
+          "price_raw": "R$ 13,512.37 (~$2,681.08)",
+          "usd_price": 2681.08,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-25 14:39:11",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-25 17:39:20",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-26 09:00:16",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-26 12:00:32",
+          "price_raw": "R$ 13,546.39 (~$2,691.73)",
+          "usd_price": 2691.73,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-26 15:00:49",
+          "price_raw": "R$ 13,546.39 (~$2,689.75)",
+          "usd_price": 2689.75,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-26 18:01:00",
+          "price_raw": "R$ 13,546.39 (~$2,685.32)",
+          "usd_price": 2685.32,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-27 11:42:46",
+          "price_raw": "R$ 13,590.94 (~$2,676.91)",
+          "usd_price": 2676.91,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-27 14:43:04",
+          "price_raw": "R$ 13,590.94 (~$2,678.70)",
+          "usd_price": 2678.7,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-27 17:43:14",
+          "price_raw": "R$ 13,590.94 (~$2,679.60)",
+          "usd_price": 2679.6,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-28 09:10:56",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-28 12:11:06",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-28 15:11:35",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-29 08:57:10",
+          "price_raw": "R$ 13,608.76 (~$2,699.08)",
+          "usd_price": 2699.08,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-29 11:57:19",
+          "price_raw": "R$ 13,608.76 (~$2,684.39)",
+          "usd_price": 2684.39,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-29 14:57:37",
+          "price_raw": "R$ 13,608.76 (~$2,691.99)",
+          "usd_price": 2691.99,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-29 17:57:37",
+          "price_raw": "R$ 13,608.76 (~$2,693.42)",
+          "usd_price": 2693.42,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-01 09:33:58",
+          "price_raw": "$1,849.99",
+          "usd_price": 1849.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC73 Keyboard Workstation",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122390303.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-01 12:34:14",
+          "price_raw": "$1,849.99",
+          "usd_price": 1849.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC73 Keyboard Workstation",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122390303.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-01 15:34:32",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-02 09:01:10",
+          "price_raw": "$1,849.99",
+          "usd_price": 1849.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC73 Keyboard Workstation",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122390303.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-02 12:01:25",
+          "price_raw": "$1,849.99",
+          "usd_price": 1849.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC73 Keyboard Workstation",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122390303.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-02 15:01:45",
+          "price_raw": "$1,849.99",
+          "usd_price": 1849.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC73 Keyboard Workstation",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122390303.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-02 18:01:48",
+          "price_raw": "$1,879.99",
+          "usd_price": 1879.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC73 Keyboard Workstation",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122394889.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-03 12:01:29",
+          "price_raw": "$1,879.99",
+          "usd_price": 1879.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC73 Keyboard Workstation",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122394889.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-03 15:01:42",
+          "price_raw": "$1,879.99",
+          "usd_price": 1879.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC73 Keyboard Workstation",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122394889.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-03 18:02:10",
+          "price_raw": "$1,879.99",
+          "usd_price": 1879.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC73 Keyboard Workstation",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC73-Keyboard-Workstation-122394889.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-05 09:34:59",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-05 12:35:03",
+          "price_raw": "R$ 13,674.10 (~$2,654.86)",
+          "usd_price": 2654.86,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-05 15:35:21",
+          "price_raw": "R$ 13,674.10 (~$2,649.92)",
+          "usd_price": 2649.92,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-08 10:13:56",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-08 13:13:32",
+          "price_raw": "R$ 13,955.44 (~$2,693.79)",
+          "usd_price": 2693.79,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-08 16:14:01",
+          "price_raw": "R$ 13,955.44 (~$2,692.85)",
+          "usd_price": 2692.85,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-09 09:42:48",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-09 12:43:09",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-09 15:43:19",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-09 18:43:20",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-09 21:43:34",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-10 09:16:28",
+          "price_raw": "R$ 13,967.32 (~$2,691.92)",
+          "usd_price": 2691.92,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-10 12:16:46",
+          "price_raw": "R$ 13,967.32 (~$2,687.57)",
+          "usd_price": 2687.57,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-10 15:17:03",
+          "price_raw": "R$ 13,967.32 (~$2,693.07)",
+          "usd_price": 2693.07,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-10 18:17:32",
+          "price_raw": "R$ 13,967.32 (~$2,689.44)",
+          "usd_price": 2689.44,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-10 21:17:46",
+          "price_raw": "R$ 13,967.32 (~$2,690.16)",
+          "usd_price": 2690.16,
+          "retailer": "eBay",
+          "title": "Yamaha YC73 Stage Keyboard VCM Organ, Piano, FM Synth 73-Key BHS Stage Keyboard",
+          "link": "https://www.ebay.com/itm/206212699629",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-11 09:37:13",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-11 12:37:38",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-11 15:38:06",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-11 18:38:35",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-06-15 09:54:17",
+          "price_raw": "$2,699.99",
+          "usd_price": 2699.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC73 73-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC73--yamaha-yc73-73-key-stage-keyboard",
+          "status": "Searching..."
+        }
+      ]
+    },
+    "yamaha-yc61": {
+      "name": "Yamaha YC61",
+      "currency": "USD",
+      "active": false,
+      "target_price": 1800.0,
+      "best_deal": {
+        "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+        "price": 1584.4188208302842,
+        "price_str": "R$ 8,010.98 (~$1,584.42)",
+        "link": "https://www.ebay.com/itm/177946794325",
+        "source": "eBay"
+      },
+      "deals": [
+        {
+          "date": "2026-05-21 16:27:32",
+          "price_raw": "$2,099.99",
+          "usd_price": 2099.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC61 61-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC61--yamaha-yc61-61-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-21 17:31:38",
+          "price_raw": "R$ 7,973.00 (~$1,589.89)",
+          "usd_price": 1589.89,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-22 09:44:58",
+          "price_raw": "$2,099.99",
+          "usd_price": 2099.99,
+          "retailer": "Sweetwater",
+          "title": "Yamaha YC61 61-key Stage Keyboard",
+          "link": "https://www.sweetwater.com/store/detail/YC61--yamaha-yc61-61-key-stage-keyboard",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-05-22 12:05:35",
+          "price_raw": "R$ 7,980.34 (~$1,584.06)",
+          "usd_price": 1584.06,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-22 12:09:13",
+          "price_raw": "R$ 7,980.34 (~$1,583.31)",
+          "usd_price": 1583.31,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-22 14:01:37",
+          "price_raw": "R$ 7,980.34 (~$1,584.50)",
+          "usd_price": 1584.5,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-22 17:01:46",
+          "price_raw": "R$ 7,980.34 (~$1,583.43)",
+          "usd_price": 1583.43,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-25 14:40:01",
+          "price_raw": "R$ 7,117.13 (~$1,421.98)",
+          "usd_price": 1421.98,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-25 17:40:06",
+          "price_raw": "R$ 7,117.13 (~$1,418.46)",
+          "usd_price": 1418.46,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-26 09:01:02",
+          "price_raw": "R$ 7,089.86 (~$1,413.62)",
+          "usd_price": 1413.62,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-26 12:01:19",
+          "price_raw": "R$ 7,089.86 (~$1,408.79)",
+          "usd_price": 1408.79,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-26 15:01:35",
+          "price_raw": "R$ 7,089.86 (~$1,407.75)",
+          "usd_price": 1407.75,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-26 18:01:47",
+          "price_raw": "R$ 7,089.86 (~$1,405.44)",
+          "usd_price": 1405.44,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-27 08:43:27",
+          "price_raw": "R$ 7,113.17 (~$1,413.87)",
+          "usd_price": 1413.87,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-27 11:43:32",
+          "price_raw": "R$ 7,113.17 (~$1,401.03)",
+          "usd_price": 1401.03,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-27 14:43:51",
+          "price_raw": "R$ 7,113.17 (~$1,401.97)",
+          "usd_price": 1401.97,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-27 17:44:01",
+          "price_raw": "R$ 7,113.17 (~$1,402.44)",
+          "usd_price": 1402.44,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-28 09:11:42",
+          "price_raw": "R$ 7,149.06 (~$1,415.06)",
+          "usd_price": 1415.06,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-28 12:11:52",
+          "price_raw": "R$ 7,149.06 (~$1,413.98)",
+          "usd_price": 1413.98,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-28 15:12:21",
+          "price_raw": "R$ 7,149.06 (~$1,418.15)",
+          "usd_price": 1418.15,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-29 08:57:56",
+          "price_raw": "R$ 7,122.50 (~$1,412.63)",
+          "usd_price": 1412.63,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-29 11:58:05",
+          "price_raw": "R$ 7,122.50 (~$1,404.94)",
+          "usd_price": 1404.94,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-29 14:58:23",
+          "price_raw": "R$ 7,122.50 (~$1,408.92)",
+          "usd_price": 1408.92,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-05-29 17:58:23",
+          "price_raw": "R$ 7,122.50 (~$1,409.67)",
+          "usd_price": 1409.67,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-01 09:34:44",
+          "price_raw": "R$ 7,116.00 (~$1,410.67)",
+          "usd_price": 1410.67,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-01 12:35:05",
+          "price_raw": "R$ 7,116.00 (~$1,411.20)",
+          "usd_price": 1411.2,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-01 15:35:19",
+          "price_raw": "R$ 7,116.00 (~$1,413.81)",
+          "usd_price": 1413.81,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-02 09:01:56",
+          "price_raw": "R$ 7,103.42 (~$1,415.95)",
+          "usd_price": 1415.95,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-02 12:02:11",
+          "price_raw": "R$ 7,103.42 (~$1,414.94)",
+          "usd_price": 1414.94,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-02 15:02:33",
+          "price_raw": "R$ 7,103.42 (~$1,410.89)",
+          "usd_price": 1410.89,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-02 18:02:34",
+          "price_raw": "R$ 7,103.42 (~$1,415.39)",
+          "usd_price": 1415.39,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-03 09:01:36",
+          "price_raw": "R$ 7,072.62 (~$1,412.89)",
+          "usd_price": 1412.89,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-03 12:02:15",
+          "price_raw": "R$ 7,072.62 (~$1,399.30)",
+          "usd_price": 1399.3,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-03 15:02:28",
+          "price_raw": "R$ 7,072.62 (~$1,389.73)",
+          "usd_price": 1389.73,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-03 18:02:56",
+          "price_raw": "R$ 7,072.62 (~$1,392.77)",
+          "usd_price": 1392.77,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 61-Key  Black Portable Electronic Stage Keyboard New",
+          "link": "https://www.ebay.com/itm/306643294533",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-05 09:35:46",
+          "price_raw": "R$ 8,019.53 (~$1,584.23)",
+          "usd_price": 1584.23,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-05 12:35:50",
+          "price_raw": "R$ 8,019.53 (~$1,557.01)",
+          "usd_price": 1557.01,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-05 15:36:08",
+          "price_raw": "R$ 8,019.53 (~$1,554.11)",
+          "usd_price": 1554.11,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-08 10:14:42",
+          "price_raw": "R$ 8,184.53 (~$1,585.17)",
+          "usd_price": 1585.17,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-08 13:14:19",
+          "price_raw": "R$ 8,184.53 (~$1,579.84)",
+          "usd_price": 1579.84,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-08 16:14:49",
+          "price_raw": "R$ 8,184.53 (~$1,579.29)",
+          "usd_price": 1579.29,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-09 09:43:35",
+          "price_raw": "R$ 8,223.33 (~$1,586.78)",
+          "usd_price": 1586.78,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-09 12:43:56",
+          "price_raw": "R$ 8,223.33 (~$1,586.78)",
+          "usd_price": 1586.78,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-09 15:44:05",
+          "price_raw": "R$ 8,223.33 (~$1,584.98)",
+          "usd_price": 1584.98,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-09 18:44:07",
+          "price_raw": "R$ 8,223.33 (~$1,584.70)",
+          "usd_price": 1584.7,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-09 21:44:21",
+          "price_raw": "R$ 8,223.33 (~$1,584.37)",
+          "usd_price": 1584.37,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-10 09:17:15",
+          "price_raw": "R$ 8,191.50 (~$1,578.75)",
+          "usd_price": 1578.75,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-10 12:17:33",
+          "price_raw": "R$ 8,191.50 (~$1,576.20)",
+          "usd_price": 1576.2,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-10 15:17:49",
+          "price_raw": "R$ 8,191.50 (~$1,579.42)",
+          "usd_price": 1579.42,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-10 18:18:19",
+          "price_raw": "$1,499.99",
+          "usd_price": 1499.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC61 Stage Piano",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-10 21:18:33",
+          "price_raw": "$1,499.99",
+          "usd_price": 1499.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC61 Stage Piano",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-11 09:38:00",
+          "price_raw": "$1,499.99",
+          "usd_price": 1499.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC61 Stage Piano",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-11 12:38:24",
+          "price_raw": "$1,499.99",
+          "usd_price": 1499.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC61 Stage Piano",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-11 15:38:52",
+          "price_raw": "$1,499.99",
+          "usd_price": 1499.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC61 Stage Piano",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-11 18:39:21",
+          "price_raw": "$1,499.99",
+          "usd_price": 1499.99,
+          "retailer": "Guitar Center",
+          "title": "Used Yamaha YC61 Stage Piano",
+          "link": "https://www.guitarcenter.com/Used/Yamaha/Used-Yamaha-YC61-Stage-Piano-122422364.gc",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-06-15 09:55:04",
+          "price_raw": "R$ 8,010.98 (~$1,584.42)",
+          "usd_price": 1584.42,
+          "retailer": "eBay",
+          "title": "Yamaha YC61 Stage Keyboard 61 Keys YC-61 Black Synthesizer Medium Portable Japan",
+          "link": "https://www.ebay.com/itm/177946794325",
+          "status": "TARGET MET!"
+        }
+      ]
+    },
+    "pneu-michelin-20555-r16": {
+      "name": "Pneu Michelin 205/55 R16",
+      "currency": "BRL",
+      "active": true,
+      "target_price": 450.0,
+      "best_deal": {
+        "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
+        "price": 286.68,
+        "price_str": "R$ 286.68",
+        "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=25&amp;type=product&amp;tracking_id=31178286-bc38-4504-b8f0-3f76ca8c7c05&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
+        "source": "Mercado Livre"
+      },
+      "deals": [
+        {
+          "date": "2026-09-14 14:13:59",
+          "price_raw": "R$ 286.99",
+          "usd_price": 286.99,
+          "retailer": "Mercado Livre",
+          "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
+          "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=49&amp;type=product&amp;tracking_id=73c458d9-3a1e-4033-9a0b-723262620e5f&amp;wid=MLB4033669827&amp;sid=search",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-09-14 16:04:42",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-09-14 16:07:38",
+          "price_raw": "R$ 286.99",
+          "usd_price": 286.99,
+          "retailer": "Mercado Livre",
+          "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
+          "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=20&amp;type=product&amp;tracking_id=5437dc90-29b8-4f97-bc45-d098d5b33a0f&amp;wid=MLB4033669827&amp;sid=search",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-09-14 17:37:23",
+          "price_raw": "R$ 286.99",
+          "usd_price": 286.99,
+          "retailer": "Mercado Livre",
+          "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
+          "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=20&amp;type=product&amp;tracking_id=50714157-d3eb-446a-a5b7-cb9e863a6d63&amp;wid=MLB4033669827&amp;sid=search",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-10-30 17:37:49",
+          "price_raw": "R$ 286.68",
+          "usd_price": 286.68,
+          "retailer": "Mercado Livre",
+          "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
+          "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=25&amp;type=product&amp;tracking_id=2a59cca5-5403-45e8-bdb3-d3cf78d9f0c0&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
+          "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-10-30 17:40:45",
+          "price_raw": "R$ 286.68",
+          "usd_price": 286.68,
+          "retailer": "Mercado Livre",
+          "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
+          "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=25&amp;type=product&amp;tracking_id=31178286-bc38-4504-b8f0-3f76ca8c7c05&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
+          "status": "TARGET MET!"
+        }
+      ]
+    },
+    "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera": {
+      "name": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
+      "currency": "BRL",
+      "active": true,
+      "target_price": 500.0,
+      "best_deal": {
+        "title": "Hollyland Microfone Sem Fio Duplo Lark M2 Usb-c Para iPhone Cor Preto",
+        "price": 593.9,
+        "price_str": "R$ 593.90",
+        "link": "https://www.mercadolivre.com.br/hollyland-microfone-sem-fio-duplo-lark-m2-usb-c-para-iphone-cor-preto/p/MLB46342327#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=grid&amp;position=11&amp;type=product&amp;tracking_id=51e0d9b9-de7f-4bc7-b8a7-3881d5f07028&amp;overlay_label_capability=not_apply&amp;wid=MLB6297028988&amp;sid=search",
+        "source": "Mercado Livre"
+      },
+      "deals": [
+        {
+          "date": "2026-10-30 17:41:22",
+          "price_raw": "R$ 593.90",
+          "usd_price": 593.9,
+          "retailer": "Mercado Livre",
+          "title": "Hollyland Microfone Sem Fio Duplo Lark M2 Usb-c Para iPhone Cor Preto",
+          "link": "https://www.mercadolivre.com.br/hollyland-microfone-sem-fio-duplo-lark-m2-usb-c-para-iphone-cor-preto/p/MLB46342327#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=grid&amp;position=11&amp;type=product&amp;tracking_id=51e0d9b9-de7f-4bc7-b8a7-3881d5f07028&amp;overlay_label_capability=not_apply&amp;wid=MLB6297028988&amp;sid=search",
+          "status": "Searching..."
+        }
+      ]
+    }
+  },
+  "usd_to_brl_rate": 5.4444,
+  "last_search_time": "2026-10-30 17:40:30",
+  "search_interval": "3h"
+};
+        let chartInstance = null;
+        let selectedCurrency = 'BRL';
+        
+        const STORE_PRESETS = {
+            'BRL': [
+                { name: 'Mercado Livre', url: 'https://lista.mercadolivre.com.br/{query}', checked: true },
+                { name: 'Google Shopping', url: 'https://www.google.com/search?tbm=shop&q={query}&hl=pt-BR', checked: true },
+                { name: 'Amazon Brasil', url: 'https://www.amazon.com.br/s?k={query}', checked: true },
+                { name: 'PneuStore', url: 'https://www.pneustore.com.br/busca/?q={query}', checked: false }
+            ],
+            'USD': [
+                { name: 'eBay', url: 'https://www.ebay.com/sch/i.html?_nkw={query}&_sop=15', checked: true },
+                { name: 'Sweetwater', url: 'https://www.sweetwater.com/store/search?s={query}', checked: true },
+                { name: 'Amazon US', url: 'https://www.amazon.com/s?k={query}', checked: true },
+                { name: 'B&H Photo', url: 'https://www.bhphotovideo.com/c/search?Ntt={query}', checked: false },
+                { name: 'Guitar Center', url: 'https://www.guitarcenter.com/search?Ntt={query}', checked: false },
+                { name: 'Best Buy', url: 'https://www.bestbuy.com/site/searchpage.jsp?st={query}', checked: false }
+            ]
+        };
+        
+        function setCurrencySelection(curr) {
+            selectedCurrency = curr;
+            const btnBrl = document.getElementById('btn-curr-brl');
+            const btnUsd = document.getElementById('btn-curr-usd');
+            const sym = document.getElementById('new-prod-curr-symbol');
+            const hint = document.getElementById('stores-hint');
+            
+            if (curr === 'BRL') {
+                btnBrl.classList.add('active');
+                btnUsd.classList.remove('active');
+                sym.innerText = 'R$';
+                hint.innerText = 'Sugestões para compra nacional';
+            } else {
+                btnUsd.classList.add('active');
+                btnBrl.classList.remove('active');
+                sym.innerText = '$';
+                hint.innerText = 'Sugestões para compra internacional';
+            }
+            renderStoreCheckboxes(curr);
+        }
+        
+        function renderStoreCheckboxes(curr) {
+            const container = document.getElementById('stores-checkboxes-container');
+            container.innerHTML = '';
+            const list = STORE_PRESETS[curr] || [];
+            list.forEach((st) => {
+                const div = document.createElement('label');
+                div.style.display = 'flex';
+                div.style.alignItems = 'center';
+                div.style.gap = '0.5rem';
+                div.style.fontSize = '0.85rem';
+                div.style.cursor = 'pointer';
+                div.style.color = '#fff';
+                div.innerHTML = `<input type="checkbox" class="store-checkbox" value="${st.name}" data-url="${st.url}" ${st.checked ? 'checked' : ''}> ${st.name}`;
+                container.appendChild(div);
+            });
+        }
+        
+        function renderProduct(productId) {
+            const product = embeddedData.products[productId];
+            if (!product) return;
+            
+            const currency = product.currency || 'USD';
+            const isBrl = currency === 'BRL';
+            const rate = embeddedData.usd_to_brl_rate;
+            const targetPrice = product.target_price || 0;
+            const bestDeal = product.best_deal;
+            const deals = product.deals || [];
+            
+            // Update active status indicator in header
+            const dot = document.getElementById('product-active-indicator');
+            if (product.active !== false) {
+                dot.style.backgroundColor = 'var(--accent-green)';
+                dot.title = "Produto ativo no monitoramento";
+            } else {
+                dot.style.backgroundColor = 'var(--text-secondary)';
+                dot.title = "Produto pausado no monitoramento";
+            }
+            
+            // Update target price symbol and value
+            document.getElementById('target-currency-symbol').innerText = isBrl ? 'R$' : '$';
+            document.getElementById('input-target-price').value = targetPrice;
+            if (isBrl) {
+                document.getElementById('target-price-brl').innerText = 'Moeda Nativa: Real (R$)';
+            } else {
+                const targetBrl = 'R$ ' + (targetPrice * rate).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('target-price-brl').innerText = 'Equivalente em BRL: ' + targetBrl;
+            }
+            
+            // Update title
+            document.getElementById('header-product-title').innerText = product.name;
+            
+            // Calculate valid deals
+            const validDeals = deals.filter(d => d.usd_price !== null || (d.price_raw && d.price_raw !== 'N/A'));
+            
+            // Get lowest deal
+            let lowestDeal = null;
+            if (deals.length > 0) {
+                const priced = deals.filter(d => d.usd_price !== null && d.usd_price > 0);
+                if (priced.length > 0) {
+                    lowestDeal = priced.reduce((min, d) => d.usd_price < min.usd_price ? d : min, priced[0]);
+                }
+            }
+            
+            // Best deal formatting
+            let bestPriceStr = bestDeal ? bestDeal.price_str : "N/A";
+            let bestPriceBrlStr = "N/A";
+            if (bestDeal) {
+                if (isBrl) {
+                    bestPriceBrlStr = "Moeda Nacional (R$)";
+                } else {
+                    bestPriceBrlStr = 'R$ ' + (bestDeal.price * rate).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+            }
+            
+            document.getElementById('stat-current').innerText = bestPriceStr;
+            document.getElementById('stat-current-brl').innerText = bestPriceBrlStr;
+            
+            // Link styling
+            const currentCard = document.getElementById('stat-current-card');
+            if (bestDeal && bestDeal.link && bestDeal.link !== 'N/A') {
+                currentCard.href = bestDeal.link;
+                currentCard.target = "_blank";
+                currentCard.style.cursor = "pointer";
+                currentCard.style.pointerEvents = "auto";
+            } else {
+                currentCard.removeAttribute('href');
+                currentCard.removeAttribute('target');
+                currentCard.style.cursor = "default";
+                currentCard.style.pointerEvents = "none";
+            }
+            
+            // Lowest price card
+            let lowestPriceStr = "N/A";
+            let lowestPriceBrlStr = "N/A";
+            if (lowestDeal) {
+                lowestPriceStr = lowestDeal.price_raw;
+                if (isBrl) {
+                    lowestPriceBrlStr = "Menor valor registrado";
+                } else {
+                    lowestPriceBrlStr = 'R$ ' + (lowestDeal.usd_price * rate).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+            }
+            document.getElementById('stat-lowest').innerText = lowestPriceStr;
+            document.getElementById('stat-lowest-brl').innerText = lowestPriceBrlStr;
+            
+            const lowestCard = document.getElementById('stat-lowest-card');
+            if (lowestDeal && lowestDeal.link && lowestDeal.link !== 'N/A') {
+                lowestCard.href = lowestDeal.link;
+                lowestCard.target = "_blank";
+                lowestCard.style.cursor = "pointer";
+                lowestCard.style.pointerEvents = "auto";
+            } else {
+                lowestCard.removeAttribute('href');
+                lowestCard.removeAttribute('target');
+                lowestCard.style.cursor = "default";
+                lowestCard.style.pointerEvents = "none";
+            }
+            
+            document.getElementById('stat-rate').innerText = 'R$ ' + rate.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+            document.getElementById('stat-total').innerText = deals.length;
+            
+            // Right panel best deal
+            const offerTitle = document.getElementById('offer-title');
+            const offerPrice = document.getElementById('offer-price');
+            const offerPriceBrl = document.getElementById('offer-price-brl');
+            const offerRetailer = document.getElementById('offer-retailer');
+            const offerLinkBtn = document.getElementById('offer-link-btn');
+            
+            if (bestDeal) {
+                offerTitle.innerText = bestDeal.title;
+                offerPrice.innerText = bestDeal.price_str;
+                offerPriceBrl.innerText = isBrl ? "Preço à vista / parcelado" : bestPriceBrlStr;
+                offerRetailer.innerHTML = '<i class="fa-solid fa-store"></i> ' + bestDeal.source;
+                
+                if (bestDeal.link && bestDeal.link !== 'N/A') {
+                    offerLinkBtn.href = bestDeal.link;
+                    offerLinkBtn.style.display = "inline-flex";
+                } else {
+                    offerLinkBtn.style.display = "none";
+                }
+            } else {
+                offerTitle.innerText = "Nenhuma oferta encontrada ainda.";
+                offerPrice.innerText = "N/A";
+                offerPriceBrl.innerText = "N/A";
+                offerRetailer.innerHTML = '<i class="fa-solid fa-store"></i> -';
+                offerLinkBtn.style.display = "none";
+            }
+            
+            // Table
+            const tbody = document.querySelector('#history-table tbody');
+            tbody.innerHTML = '';
+            
+            deals.slice().reverse().forEach(deal => {
+                const tr = document.createElement('tr');
+                const storeBadge = '<span class="source-badge">' + deal.retailer + '</span>';
+                const isMet = deal.status.toLowerCase().includes('met') || deal.status.toLowerCase().includes('atingido');
+                const statusBadge = '<span class="status-badge ' + (isMet ? 'met' : 'searching') + '">' + deal.status + '</span>';
+                const linkCol = deal.link && deal.link !== 'N/A' ? '<a href="' + deal.link + '" target="_blank" class="link-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>' : '-';
+                
+                let subPriceStr = '';
+                if (!isBrl && deal.usd_price) {
+                    const bVal = deal.usd_price * rate;
+                    subPriceStr = '<div style="font-size: 0.75rem; color: var(--accent-secondary); font-weight: 500; margin-top: 0.15rem;">R$ ' + bVal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</div>';
+                }
+                
+                tr.innerHTML = `
+                    <td>${deal.date}</td>
+                    <td style="font-weight: 600;">
+                        <div>${deal.price_raw}</div>
+                        ${subPriceStr}
+                    </td>
+                    <td>${storeBadge}</td>
+                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${deal.title}</td>
+                    <td>${statusBadge}</td>
+                    <td style="text-align: center;">${linkCol}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            renderChart(validDeals, rate, currency);
+        }
+        
+        function renderChart(validDeals, rate, currency) {
+            const isBrl = currency === 'BRL';
+            const labels = validDeals.map(d => d.date.split(' ')[0]);
+            const prices = validDeals.map(d => {
+                if (d.usd_price !== null && d.usd_price !== undefined) {
+                    return d.usd_price;
+                }
+                const clean = (d.price_raw || '').replace(/[^0-9,\.]/g, '');
+                return parseFloat(clean.replace(',', '.')) || 0;
+            });
+            
+            const canvas = document.getElementById('priceChart');
+            const ctx = canvas.getContext('2d');
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(139, 92, 246, 0.4)');
+            gradient.addColorStop(1, 'rgba(139, 92, 246, 0.0)');
+            
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: isBrl ? 'Preço (R$)' : 'Preço (USD)',
+                        data: prices,
+                        borderColor: '#8b5cf6',
+                        borderWidth: 3,
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#06b6d4',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleColor: '#fff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    const deal = validDeals[context.dataIndex];
+                                    if (isBrl) {
+                                        return ['Preço: ' + deal.price_raw + ' (' + deal.retailer + ')'];
+                                    } else {
+                                        const brlVal = deal.usd_price * rate;
+                                        const brlStr = 'R$ ' + brlVal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                        return [
+                                            'Preço: ' + deal.price_raw + ' (' + deal.retailer + ')',
+                                            'Equivalente hoje: ' + brlStr
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { family: 'Inter' } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { 
+                                color: '#94a3b8', 
+                                font: { family: 'Inter' },
+                                callback: function(value) { return (isBrl ? 'R$ ' : '$') + value; }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function openManageModal(tabName) {
+            document.getElementById('modal-manage-products').style.display = 'flex';
+            if (tabName === 'new') {
+                switchManageTab('new');
+            } else {
+                switchManageTab('list');
+                renderManageList();
+            }
+        }
+        
+        function closeManageModal() {
+            document.getElementById('modal-manage-products').style.display = 'none';
+        }
+        
+        function switchManageTab(tab) {
+            const btnList = document.getElementById('tab-btn-list');
+            const btnNew = document.getElementById('tab-btn-new');
+            const contentList = document.getElementById('tab-content-list');
+            const contentNew = document.getElementById('tab-content-new');
+            
+            if (tab === 'new') {
+                btnNew.classList.add('active');
+                btnList.classList.remove('active');
+                contentNew.style.display = 'block';
+                contentList.style.display = 'none';
+            } else {
+                btnList.classList.add('active');
+                btnNew.classList.remove('active');
+                contentList.style.display = 'block';
+                contentNew.style.display = 'none';
+                renderManageList();
+            }
+        }
+        
+        function renderManageList() {
+            const listContainer = document.getElementById('manage-products-list');
+            listContainer.innerHTML = '';
+            const productIds = Object.keys(embeddedData.products);
+            
+            if (productIds.length === 0) {
+                listContainer.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 2rem;">Nenhum produto cadastrado. Clique em "+ Novo Produto" acima para começar.</div>';
+                return;
+            }
+            
+            productIds.forEach(id => {
+                const p = embeddedData.products[id];
+                const isBrl = p.currency === 'BRL';
+                const row = document.createElement('div');
+                row.style.background = 'rgba(15, 23, 42, 0.4)';
+                row.style.border = '1px solid var(--card-border)';
+                row.style.borderRadius = '14px';
+                row.style.padding = '1rem 1.25rem';
+                row.style.display = 'flex';
+                row.style.alignItems = 'center';
+                row.style.justifyContent = 'space-between';
+                row.style.flexWrap = 'wrap';
+                row.style.gap = '1rem';
+                
+                const currBadge = isBrl ? '<span class="badge-curr brl">R$ BRL</span>' : '<span class="badge-curr usd">US$ USD</span>';
+                const targetDisplay = (isBrl ? 'R$ ' : '$') + (p.target_price || 0).toLocaleString('pt-BR');
+                const isAct = p.active !== false;
+                
+                row.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div>
+                            <div style="font-weight: 700; font-size: 1rem; color: #fff; font-family: 'Outfit', sans-serif;">${p.name}</div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem;">
+                                ${currBadge}
+                                <span style="font-size: 0.8rem; color: var(--text-secondary);">Alvo: <b>${targetDisplay}</b></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 1.25rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 0.8rem; color: ${isAct ? 'var(--accent-green)' : 'var(--text-secondary)'}; font-weight: 600;">${isAct ? 'Ativo' : 'Pausado'}</span>
+                            <label class="switch">
+                                <input type="checkbox" ${isAct ? 'checked' : ''} onchange="toggleProductActive('${id}', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <button type="button" onclick="deleteProduct('${id}', '${p.name}')" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="Excluir Produto">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(row);
+            });
+        }
+        
+        async function toggleProductActive(productId, activeState) {
+            try {
+                const res = await fetch('/api/products/toggle-active', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, active: activeState })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    embeddedData.products[productId].active = data.active;
+                    renderManageList();
+                    const sel = document.getElementById('product-select').value;
+                    if (sel === productId) {
+                        renderProduct(productId);
+                    }
+                } else {
+                    alert("Erro ao alterar status: " + data.message);
+                }
+            } catch (err) {
+                alert("Erro ao se comunicar com o servidor: " + err);
+            }
+        }
+        
+        async function deleteProduct(productId, productName) {
+            if (!confirm(`Tem certeza que deseja remover o produto "${productName}"?`)) {
+                return;
+            }
+            const deleteHistory = confirm(`Deseja também APAGAR todos os arquivos de histórico e dados acumulados de "${productName}"?
+
+Clique em OK para APAGAR o histórico.
+Clique em Cancelar para MANTER o histórico arquivado.`);
+            
+            try {
+                const res = await fetch('/api/products/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, delete_history: deleteHistory })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    delete embeddedData.products[productId];
+                    initSelector();
+                    renderManageList();
+                } else {
+                    alert("Erro ao excluir produto: " + data.message);
+                }
+            } catch (err) {
+                alert("Erro ao se comunicar com o servidor: " + err);
+            }
+        }
+        
+        function updateSchedulerStatusText(interval) {
+            const statusText = document.getElementById('scheduler-status-text');
+            if (interval === 'manual') {
+                statusText.innerText = 'Desativado (Execução Manual)';
+                statusText.style.color = 'var(--text-secondary)';
+            } else {
+                statusText.innerText = 'Ativo (' + getIntervalLabel(interval) + ')';
+                statusText.style.color = 'var(--accent-green)';
+            }
+        }
+        
+        function getIntervalLabel(val) {
+            switch(val) {
+                case '14:00_17:30': return '14:00 & 17:30';
+                case '1h': return 'De 1 em 1 hora';
+                case '3h': return 'De 3 em 3 horas';
+                case '6h': return 'De 6 em 6 horas';
+                case '12h': return 'De 12 em 12 horas';
+                default: return val;
+            }
+        }
+        
+        function initSelector() {
+            const select = document.getElementById('product-select');
+            select.innerHTML = '';
+            
+            const productIds = Object.keys(embeddedData.products);
+            productIds.forEach(id => {
+                const p = embeddedData.products[id];
+                const opt = document.createElement('option');
+                opt.value = id;
+                const statusTag = p.active === false ? ' (Pausado)' : '';
+                opt.innerText = `${p.name} [${p.currency || 'USD'}]${statusTag}`;
+                select.appendChild(opt);
+            });
+            
+            select.addEventListener('change', (e) => {
+                renderProduct(e.target.value);
+            });
+            
+            const intervalSelect = document.getElementById('select-search-interval');
+            if (embeddedData.search_interval) {
+                intervalSelect.value = embeddedData.search_interval;
+                updateSchedulerStatusText(embeddedData.search_interval);
+            }
+            
+            if (productIds.length > 0) {
+                renderProduct(productIds[0]);
+            }
+        }
+        
+        // Save price listener
+        const btnSavePrice = document.getElementById('btn-save-price');
+        btnSavePrice.addEventListener('click', async () => {
+            const productId = document.getElementById('product-select').value;
+            const newPrice = parseFloat(document.getElementById('input-target-price').value);
+            if (isNaN(newPrice) || newPrice <= 0) {
+                alert("Por favor, insira um preço válido maior que zero.");
+                return;
+            }
+            
+            btnSavePrice.disabled = true;
+            btnSavePrice.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Salvando...';
+            
+            try {
+                const res = await fetch('/update-target-price', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, target_price: newPrice })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    embeddedData.products[productId].target_price = newPrice;
+                    renderProduct(productId);
+                    alert("Preço-alvo atualizado com sucesso!");
+                } else {
+                    alert("Erro ao salvar preço: " + data.message);
+                }
+            } catch (err) {
+                alert("Erro ao se comunicar com o servidor: " + err);
+            } finally {
+                btnSavePrice.disabled = false;
+                btnSavePrice.innerHTML = 'Salvar Preço';
+            }
+        });
+        
+        // Save interval listener
+        const selectInterval = document.getElementById('select-search-interval');
+        const spinner = document.getElementById('save-interval-spinner');
+        selectInterval.addEventListener('change', async () => {
+            const newInterval = selectInterval.value;
+            spinner.style.display = 'inline';
+            selectInterval.disabled = true;
+            
+            try {
+                const res = await fetch('/update-interval', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ interval: newInterval })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    embeddedData.search_interval = newInterval;
+                    updateSchedulerStatusText(newInterval);
+                } else {
+                    alert("Erro ao salvar frequência de busca: " + data.message);
+                }
+            } catch (err) {
+                alert("Erro de comunicação com o servidor: " + err);
+            } finally {
+                spinner.style.display = 'none';
+                selectInterval.disabled = false;
+            }
+        });
+        
+        // Dynamic BRL label update on number input changes
+        document.getElementById('input-target-price').addEventListener('input', (e) => {
+            const productId = document.getElementById('product-select').value;
+            const p = embeddedData.products[productId];
+            const isBrl = p && p.currency === 'BRL';
+            const val = parseFloat(e.target.value);
+            const rate = embeddedData.usd_to_brl_rate;
+            if (isBrl) {
+                document.getElementById('target-price-brl').innerText = 'Moeda Nativa: Real (R$)';
+            } else {
+                if (!isNaN(val) && val > 0) {
+                    const brlVal = 'R$ ' + (val * rate).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    document.getElementById('target-price-brl').innerText = 'Equivalente em BRL: ' + brlVal;
+                } else {
+                    document.getElementById('target-price-brl').innerText = 'R$ 0,00';
+                }
+            }
+        });
+        
+        // Setup Modal Listeners
+        document.getElementById('btn-open-manage').addEventListener('click', () => openManageModal('list'));
+        document.getElementById('modal-close-btn').addEventListener('click', closeManageModal);
+        document.getElementById('tab-btn-list').addEventListener('click', () => switchManageTab('list'));
+        document.getElementById('tab-btn-new').addEventListener('click', () => switchManageTab('new'));
+        document.getElementById('btn-cancel-new').addEventListener('click', () => switchManageTab('list'));
+        
+        // Toggle advanced options
+        document.getElementById('btn-toggle-advanced').addEventListener('click', () => {
+            const panel = document.getElementById('advanced-options-panel');
+            const chevron = document.getElementById('advanced-chevron');
+            if (panel.style.display === 'none' || panel.style.display === '') {
+                panel.style.display = 'flex';
+                chevron.classList.remove('fa-chevron-right');
+                chevron.classList.add('fa-chevron-down');
+            } else {
+                panel.style.display = 'none';
+                chevron.classList.remove('fa-chevron-down');
+                chevron.classList.add('fa-chevron-right');
+            }
+        });
+        
+        // Add custom store field
+        document.getElementById('btn-add-custom-store').addEventListener('click', () => {
+            const container = document.getElementById('custom-stores-container');
+            const row = document.createElement('div');
+            row.style.display = 'grid';
+            row.style.gridTemplateColumns = '140px 1fr 34px';
+            row.style.gap = '0.5rem';
+            row.style.alignItems = 'center';
+            row.innerHTML = `
+                <input type="text" placeholder="Nome da Loja" class="custom-store-name" style="padding: 0.5rem; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.4); color: #fff; font-size: 0.85rem;">
+                <input type="text" placeholder="https://loja.com.br/busca?q={query}" class="custom-store-url" style="padding: 0.5rem; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.4); color: #fff; font-size: 0.85rem;">
+                <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1rem;"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            container.appendChild(row);
+        });
+        
+        // Auto category suggestion when typing product name
+        document.getElementById('new-prod-name').addEventListener('input', (e) => {
+            const text = e.target.value.toLowerCase();
+            if (text.includes('pneu') || text.includes('aro') || text.includes('pirelli') || text.includes('michelin') || text.includes('goodyear')) {
+                setCurrencySelection('BRL');
+                const pneuCheckbox = Array.from(document.querySelectorAll('.store-checkbox')).find(cb => cb.value === 'PneuStore');
+                if (pneuCheckbox) pneuCheckbox.checked = true;
+            }
+        });
+        
+        // Form submit handler
+        document.getElementById('form-new-product').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('new-prod-name').value.trim();
+            const targetPrice = parseFloat(document.getElementById('new-prod-price').value);
+            if (!name) {
+                alert("Por favor, preencha o nome do produto.");
+                return;
+            }
+            if (isNaN(targetPrice) || targetPrice <= 0) {
+                alert("Por favor, informe um preço-alvo válido.");
+                return;
+            }
+            
+            // Collect stores
+            const stores = {};
+            const queryEncoded = encodeURIComponent(name);
+            document.querySelectorAll('.store-checkbox:checked').forEach(cb => {
+                const urlTemplate = cb.getAttribute('data-url');
+                stores[cb.value] = urlTemplate.replace('{query}', queryEncoded);
+            });
+            
+            // Custom stores
+            document.querySelectorAll('#custom-stores-container > div').forEach(div => {
+                const sName = div.querySelector('.custom-store-name').value.trim();
+                let sUrl = div.querySelector('.custom-store-url').value.trim();
+                if (sName && sUrl) {
+                    if (!sUrl.includes('{query}')) {
+                        sUrl += (sUrl.includes('?') ? '&q=' : '?q=') + queryEncoded;
+                    } else {
+                        sUrl = sUrl.replace('{query}', queryEncoded);
+                    }
+                    stores[sName] = sUrl;
+                }
+            });
+            
+            if (Object.keys(stores).length === 0) {
+                alert("Selecione ou adicione ao menos uma loja para monitorar.");
+                return;
+            }
+            
+            // Keywords
+            const excludeInput = document.getElementById('new-prod-exclude').value.trim();
+            const relevancyInput = document.getElementById('new-prod-relevancy').value.trim();
+            const excludeKeywords = excludeInput ? excludeInput.split(',').map(s => s.trim()).filter(Boolean) : [];
+            const relevancyKeywords = relevancyInput ? relevancyInput.split(',').map(s => s.trim()).filter(Boolean) : [];
+            
+            const submitBtn = document.getElementById('btn-submit-new');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Cadastrando...';
+            
+            try {
+                const res = await fetch('/api/products/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        currency: selectedCurrency,
+                        target_price: targetPrice,
+                        active: true,
+                        stores: stores,
+                        exclude_keywords: excludeKeywords,
+                        relevancy_keywords: relevancyKeywords
+                    })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert(`Produto "${name}" cadastrado com sucesso e ativado para monitoramento!`);
+                    window.location.reload();
+                } else {
+                    alert("Erro ao cadastrar produto: " + data.message);
+                }
+            } catch (err) {
+                alert("Erro ao se comunicar com o servidor: " + err);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Salvar e Ativar Monitoramento';
+            }
+        });
+        
+        const btnNewSearch = document.getElementById('btn-new-search');
+        const statusBanner = document.getElementById('search-status-banner');
+        
+        async function checkSearchStatus() {
+            try {
+                const res = await fetch('/status');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.is_searching) {
+                        setSearchingState(true);
+                        setTimeout(checkSearchStatus, 2000);
+                    } else {
+                        if (btnNewSearch.disabled) {
+                            setSearchingState(false);
+                            window.location.reload();
+                        }
+                    }
+                }
+            } catch (err) {
+                console.log("Local server offline or unreachable");
+            }
+        }
+        
+        function setSearchingState(isSearching) {
+            if (isSearching) {
+                btnNewSearch.disabled = true;
+                btnNewSearch.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Buscando...';
+                statusBanner.style.display = 'flex';
+            } else {
+                btnNewSearch.disabled = false;
+                btnNewSearch.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Buscar Agora';
+                statusBanner.style.display = 'none';
+            }
+        }
+        
+        btnNewSearch.addEventListener('click', async () => {
+            setSearchingState(true);
+            try {
+                const res = await fetch('/run-search', { method: 'POST' });
+                if (!res.ok) {
+                    throw new Error("HTTP error " + res.status);
+                }
+                const data = await res.json();
+                if (data.status === 'started' || data.status === 'already_running') {
+                    setTimeout(checkSearchStatus, 2000);
+                } else if (data.status === 'no_active_products') {
+                    alert(data.message);
+                    setSearchingState(false);
+                    openManageModal('list');
+                } else {
+                    alert("Erro ao iniciar busca: " + JSON.stringify(data));
+                    setSearchingState(false);
+                }
+            } catch (err) {
+                alert("Não foi possível se comunicar com o servidor do Caça-Preços Web. Verifique se o script está rodando no terminal.");
+                setSearchingState(false);
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initSelector();
+            setCurrencySelection('BRL');
+            checkSearchStatus();
+        });
+    </script>
+</body>
+</html>
