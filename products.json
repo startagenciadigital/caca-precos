@@ -46,7 +46,8 @@
       "Best Buy": "yamaha+yc73",
       "Sweetwater": "yamaha+yc73",
       "Guitar Center": "yamaha+yc73"
-    }
+    },
+    "profile": "fauzer"
   },
   {
     "id": "yamaha-yc61",
@@ -95,7 +96,8 @@
       "Best Buy": "yamaha+yc61",
       "Sweetwater": "yamaha+yc61",
       "Guitar Center": "yamaha+yc61"
-    }
+    },
+    "profile": "fauzer"
   },
   {
     "id": "pneu-michelin-20555-r16",
@@ -127,7 +129,8 @@
       "michelin",
       "205",
       "r16"
-    ]
+    ],
+    "profile": "fauzer"
   },
   {
     "id": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera",
@@ -171,6 +174,7 @@
       "usb",
       "lightning",
       "c\u00e2mera"
-    ]
+    ],
+    "profile": "fauzer"
   }
 ]

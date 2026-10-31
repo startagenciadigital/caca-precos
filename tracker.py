@@ -58,16 +58,17 @@ KNOWN_STORES = {
 
 # Paths and Config
 PORT = 18888
-PRODUCTS_CONFIG_FILE = "/Users/macstudio-maj/.gemini/antigravity/scratch/yamaha-yc73-tracker/products.json"
-DATA_JSON_FILE = "/Users/macstudio-maj/.gemini/antigravity/scratch/yamaha-yc73-tracker/data.json"
-DASHBOARD_FILE = "/Users/macstudio-maj/.gemini/antigravity/scratch/yamaha-yc73-tracker/dashboard.html"
-INDEX_FILE = "/Users/macstudio-maj/.gemini/antigravity/scratch/yamaha-yc73-tracker/index.html"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PRODUCTS_CONFIG_FILE = os.path.join(BASE_DIR, "products.json")
+DATA_JSON_FILE = os.path.join(BASE_DIR, "data.json")
+DASHBOARD_FILE = os.path.join(BASE_DIR, "dashboard.html")
+INDEX_FILE = os.path.join(BASE_DIR, "index.html")
 
 # State flags
 is_searching = False
 last_run_time = "N/A"
 
-CONFIG_FILE = "/Users/macstudio-maj/.gemini/antigravity/scratch/yamaha-yc73-tracker/config.json"
+CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
 
 def load_config():
     if not os.path.exists(CONFIG_FILE):
@@ -222,6 +223,7 @@ def add_product(data):
     except (ValueError, TypeError):
         target_price = 0.0
     active = bool(data.get("active", True))
+    profile = data.get("profile", "fauzer")
     
     stores = data.get("stores", {})
     if not stores:
@@ -255,7 +257,8 @@ def add_product(data):
         "stores": stores,
         "search_queries": {k: name for k in stores.keys()},
         "exclude_keywords": exclude,
-        "relevancy_keywords": relevancy
+        "relevancy_keywords": relevancy,
+        "profile": profile
     }
     
     products.append(new_prod)
@@ -283,7 +286,8 @@ def add_product(data):
         "active": active,
         "target_price": target_price,
         "best_deal": None,
-        "deals": []
+        "deals": [],
+        "profile": profile
     }
     try:
         with open(DATA_JSON_FILE, 'w') as f:
@@ -384,9 +388,9 @@ def load_products():
 
 def get_log_file(product_id):
     if product_id == "yamaha-yc73":
-        return "/Users/macstudio-maj/.gemini/antigravity/scratch/yamaha-yc73-tracker/deals.md"
+        return os.path.join(BASE_DIR, "deals.md")
     else:
-        return f"/Users/macstudio-maj/.gemini/antigravity/scratch/yamaha-yc73-tracker/deals_{product_id}.md"
+        return os.path.join(BASE_DIR, f"deals_{product_id}.md")
 
 def fetch_pages_dynamic(stores_dict):
     if not stores_dict:
@@ -1012,9 +1016,52 @@ def generate_dashboard():
     last_search_time_formatted = format_datetime_br(last_search_raw)
     
     config = load_config()
-    access_pin = str(config.get("access_pin", "140608"))
-    encrypted_payload = encrypt_data_payload(unified_data_json_str, access_pin)
-    encrypted_payload_json = json.dumps(encrypted_payload)
+    profiles = config.get("profiles", [])
+    if not profiles:
+        access_pin = str(config.get("access_pin", "140608"))
+        profiles = [
+            {"id": "fauzer", "name": "Fauzer", "pin": access_pin, "is_admin": True}
+        ]
+        
+    encrypted_payloads = []
+    for prof in profiles:
+        prof_id = prof["id"]
+        prof_name = prof["name"]
+        prof_pin = str(prof["pin"])
+        prof_is_admin = bool(prof.get("is_admin", False))
+        
+        all_prods = unified_data.get("products", {})
+        if prof_is_admin:
+            prof_products = all_prods
+            prof_default = unified_data.get("default_product")
+            if not prof_default or prof_default not in prof_products:
+                prof_default = list(prof_products.keys())[0] if prof_products else None
+        else:
+            prof_products = {
+                pid: pdata for pid, pdata in all_prods.items()
+                if pdata.get("profile") == prof_id
+            }
+            prof_default = list(prof_products.keys())[0] if prof_products else None
+            
+        prof_data = {
+            "profile": {
+                "id": prof_id,
+                "name": prof_name,
+                "is_admin": prof_is_admin
+            },
+            "all_profiles": [{"id": p["id"], "name": p["name"]} for p in profiles] if prof_is_admin else [{"id": prof_id, "name": prof_name}],
+            "products": prof_products,
+            "usd_to_brl_rate": unified_data.get("usd_to_brl_rate", 5.4),
+            "last_search_time": unified_data.get("last_search_time", "N/A"),
+            "search_interval": unified_data.get("search_interval", "3h"),
+            "default_product": prof_default
+        }
+        
+        enc_item = encrypt_data_payload(json.dumps(prof_data), prof_pin)
+        encrypted_payloads.append(enc_item)
+        
+    encrypted_payloads_json = json.dumps(encrypted_payloads)
+    encrypted_payload_json = json.dumps(encrypted_payloads[0]) if encrypted_payloads else "{}"
     
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -1618,12 +1665,12 @@ def generate_dashboard():
                 <i class="fa-solid fa-shield-halved"></i>
             </div>
             <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">Caça-Preços Web</h2>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.75rem;">Acesso Familiar Restrito</p>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.75rem;">Acesso Familiar Restrito por Perfil</p>
             
             <form id="form-pin-lock" onsubmit="handlePinSubmit(event);">
                 <div style="margin-bottom: 1.25rem;">
-                    <label for="input-pin" style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 0.6rem;">Digite o PIN de 6 dígitos</label>
-                    <input type="password" id="input-pin" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" autofocus placeholder="••••••" style="width: 100%; padding: 0.9rem; text-align: center; font-size: 1.6rem; letter-spacing: 0.6rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(15, 23, 42, 0.6); color: #fff; outline: none; font-family: monospace; transition: all 0.2s;" onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 3px rgba(139, 92, 246, 0.2)';" onblur="this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
+                    <label for="input-pin" style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 0.6rem;">Digite seu PIN de acesso</label>
+                    <input type="password" id="input-pin" maxlength="10" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" autofocus placeholder="••••" style="width: 100%; padding: 0.9rem; text-align: center; font-size: 1.6rem; letter-spacing: 0.6rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(15, 23, 42, 0.6); color: #fff; outline: none; font-family: monospace; transition: all 0.2s;" onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 3px rgba(139, 92, 246, 0.2)';" onblur="this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
                 </div>
                 
                 <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;" onclick="const cb = document.getElementById('cb-remember'); cb.checked = !cb.checked;">
@@ -1649,6 +1696,17 @@ def generate_dashboard():
                     <h1 style="margin-bottom: 0; display: flex; align-items: center; gap: 0.6rem;">
                         <i class="fa-solid fa-crosshairs" style="color: var(--accent-primary);"></i> Caça-Preços Web
                     </h1>
+                    <div id="profile-badge-pill" style="display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.35rem 0.85rem; border-radius: 999px; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.35); font-size: 0.85rem; font-weight: 600; color: #c4b5fd;">
+                        <i id="profile-badge-icon" class="fa-solid fa-user"></i>
+                        <span id="profile-badge-text">Perfil</span>
+                    </div>
+                    <div id="admin-profile-filter-wrap" style="display: none; align-items: center; gap: 0.4rem; background: rgba(15, 23, 42, 0.5); border: 1px solid var(--card-border); padding: 0.3rem 0.75rem; border-radius: 10px;">
+                        <label for="admin-profile-filter" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                            <i class="fa-solid fa-users" style="color: var(--accent-secondary);"></i> Perfil:
+                        </label>
+                        <select id="admin-profile-filter" style="background: transparent; border: none; color: #fff; font-size: 0.85rem; outline: none; cursor: pointer; font-weight: 600;">
+                        </select>
+                    </div>
                     <div class="product-selector-container">
                         <label for="product-select"><i class="fa-solid fa-box"></i> Produto:</label>
                         <select id="product-select">
@@ -1672,11 +1730,27 @@ def generate_dashboard():
                 <button id="btn-new-search" class="btn-action btn-search-trigger">
                     <i class="fa-solid fa-magnifying-glass"></i> Buscar Agora
                 </button>
-                <button id="btn-lock-session" onclick="lockSession();" class="btn-action" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); font-weight: 600;" title="Bloquear e sair">
-                    <i class="fa-solid fa-lock"></i> Sair
+                <button id="btn-lock-session" onclick="lockSession();" class="btn-action" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); font-weight: 600;" title="Trocar perfil ou bloquear acesso">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Trocar Perfil
                 </button>
             </div>
         </header>
+
+        <!-- Empty Profile State Banner -->
+        <div id="no-products-banner" style="display: none; background: rgba(30, 41, 59, 0.45); border: 1px dashed rgba(139, 92, 246, 0.4); border-radius: 16px; padding: 3rem 2rem; text-align: center; margin-bottom: 2rem; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; animation: fadeInUp 0.5s ease;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #a78bfa;">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+            <div>
+                <h3 id="no-products-title" style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">Nenhum produto cadastrado neste perfil</h3>
+                <p id="no-products-desc" style="color: var(--text-secondary); font-size: 0.9rem; max-width: 480px; margin: 0 auto;">Olá! Você ainda não tem produtos cadastrados para monitoramento. Clique no botão abaixo para adicionar seu primeiro produto!</p>
+            </div>
+            <button type="button" onclick="openManageModal('new');" class="btn-action" style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.95rem;">
+                <i class="fa-solid fa-circle-plus"></i> Cadastrar Meu Primeiro Produto
+            </button>
+        </div>
+
+        <div id="dashboard-content-area">
 
         <!-- Status banner -->
         <div id="search-status-banner" style="display: none; background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 1.25rem; margin-bottom: 2rem; align-items: center; justify-content: space-between; animation: fadeInUp 0.5s ease; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);">
@@ -1822,6 +1896,7 @@ def generate_dashboard():
                 </table>
             </div>
         </div>
+        </div> <!-- End dashboard-content-area -->
     </div>
     
     <!-- Modal Gerenciador de Produtos -->
@@ -1855,6 +1930,12 @@ def generate_dashboard():
                     <div>
                         <label style="display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600;">Nome do Produto:</label>
                         <input type="text" id="new-prod-name" placeholder="Ex: Pneu Michelin 205/55 R16, Sony WH-1000XM5, iPhone 15..." required style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.6); color: #fff; font-size: 0.95rem; outline: none;">
+                    </div>
+                    
+                    <div id="new-prod-profile-container" style="display: none;">
+                        <label style="display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600;">Vincular ao Perfil:</label>
+                        <select id="new-prod-profile" style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.6); color: #fff; font-size: 0.95rem; outline: none;">
+                        </select>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -1924,8 +2005,12 @@ def generate_dashboard():
     </div>
     
     <script>
+        const encryptedPayloads = {encrypted_payloads_json};
         const encryptedPayload = {encrypted_payload_json};
         let embeddedData = null;
+        let currentProfile = null;
+        let allAvailableProfiles = [];
+        let activeProfileFilter = 'all';
         let chartInstance = null;
         let selectedCurrency = 'BRL';
         
@@ -1969,8 +2054,25 @@ def generate_dashboard():
             }}
             
             try {{
-                const data = await decryptPayload(pin, encryptedPayload);
+                const payloads = Array.isArray(encryptedPayloads) ? encryptedPayloads : [encryptedPayloads];
+                let data = null;
+                for (const p of payloads) {{
+                    try {{
+                        data = await decryptPayload(pin, p);
+                        if (data && data.profile) break;
+                    }} catch (e) {{
+                        // Continue trying next payload
+                    }}
+                }}
+                
+                if (!data || !data.products) {{
+                    throw new Error("PIN incorreto");
+                }}
+                
                 embeddedData = data;
+                currentProfile = data.profile;
+                allAvailableProfiles = data.all_profiles || [data.profile];
+                activeProfileFilter = 'all';
                 
                 if (remember) {{
                     localStorage.setItem('caca_precos_pin', pin);
@@ -1987,6 +2089,7 @@ def generate_dashboard():
                 const mainContainer = document.getElementById('main-app-container');
                 if (mainContainer) mainContainer.style.display = 'block';
                 
+                setupProfileUI();
                 initSelector();
                 setCurrencySelection('BRL');
                 checkSearchStatus();
@@ -2017,6 +2120,72 @@ def generate_dashboard():
         function lockSession() {{
             localStorage.removeItem('caca_precos_pin');
             window.location.reload();
+        }}
+        
+        function setupProfileUI() {{
+            const badgeText = document.getElementById('profile-badge-text');
+            const badgeIcon = document.getElementById('profile-badge-icon');
+            if (badgeText && currentProfile) {{
+                if (currentProfile.is_admin) {{
+                    badgeText.innerText = currentProfile.name + ' (Admin)';
+                    if (badgeIcon) badgeIcon.className = 'fa-solid fa-crown';
+                }} else {{
+                    badgeText.innerText = currentProfile.name;
+                    if (badgeIcon) badgeIcon.className = 'fa-solid fa-user';
+                }}
+            }}
+            
+            const filterWrap = document.getElementById('admin-profile-filter-wrap');
+            const filterSelect = document.getElementById('admin-profile-filter');
+            if (currentProfile && currentProfile.is_admin && allAvailableProfiles.length > 1) {{
+                if (filterWrap) filterWrap.style.display = 'inline-flex';
+                if (filterSelect) {{
+                    filterSelect.innerHTML = '<option value="all">Todos os Perfis</option>';
+                    allAvailableProfiles.forEach(p => {{
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.innerText = p.name;
+                        filterSelect.appendChild(opt);
+                    }});
+                    filterSelect.value = activeProfileFilter;
+                    filterSelect.onchange = (e) => {{
+                        activeProfileFilter = e.target.value;
+                        initSelector();
+                        if (document.getElementById('modal-manage-products').style.display === 'flex') {{
+                            renderManageList();
+                        }}
+                    }};
+                }}
+            }} else {{
+                if (filterWrap) filterWrap.style.display = 'none';
+            }}
+            
+            const newProdProfileContainer = document.getElementById('new-prod-profile-container');
+            const newProdProfileSelect = document.getElementById('new-prod-profile');
+            if (newProdProfileContainer && newProdProfileSelect) {{
+                if (currentProfile && currentProfile.is_admin && allAvailableProfiles.length > 1) {{
+                    newProdProfileContainer.style.display = 'block';
+                    newProdProfileSelect.innerHTML = '';
+                    allAvailableProfiles.forEach(p => {{
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.innerText = p.name;
+                        if (p.id === currentProfile.id) opt.selected = true;
+                        newProdProfileSelect.appendChild(opt);
+                    }});
+                }} else {{
+                    newProdProfileContainer.style.display = 'none';
+                }}
+            }}
+        }}
+
+        function getFilteredProductIds() {{
+            if (!embeddedData || !embeddedData.products) return [];
+            const allIds = Object.keys(embeddedData.products);
+            if (!currentProfile || !currentProfile.is_admin || activeProfileFilter === 'all') {{
+                return allIds;
+            }}
+            return allIds.filter(id => embeddedData.products[id].profile === activeProfileFilter);
         }}
         
         const STORE_PRESETS = {{
@@ -2364,10 +2533,10 @@ def generate_dashboard():
         function renderManageList() {{
             const listContainer = document.getElementById('manage-products-list');
             listContainer.innerHTML = '';
-            const productIds = Object.keys(embeddedData.products);
+            const productIds = getFilteredProductIds();
             
             if (productIds.length === 0) {{
-                listContainer.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 2rem;">Nenhum produto cadastrado. Clique em "+ Novo Produto" acima para começar.</div>';
+                listContainer.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 2rem;">Nenhum produto cadastrado para este perfil. Clique em "+ Novo Produto" acima para começar.</div>';
                 return;
             }}
             
@@ -2388,6 +2557,7 @@ def generate_dashboard():
                 row.style.gap = '1rem';
                 
                 const currBadge = isBrl ? '<span class="badge-curr brl">R$ BRL</span>' : '<span class="badge-curr usd">US$ USD</span>';
+                const ownerBadge = (currentProfile && currentProfile.is_admin && p.profile) ? `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: #c4b5fd; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); padding: 0.15rem 0.5rem; border-radius: 6px;"><i class="fa-solid fa-user"></i> ${{p.profile}}</span>` : '';
                 const targetDisplay = (isBrl ? 'R$ ' : '$') + (p.target_price || 0).toLocaleString('pt-BR');
                 const isAct = p.active !== false;
                 const isDefault = (id === currentDefault);
@@ -2397,6 +2567,7 @@ def generate_dashboard():
                         <div>
                             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                                 <span style="font-weight: 700; font-size: 1rem; color: #fff; font-family: 'Outfit', sans-serif;">${{p.name}}</span>
+                                ${{ownerBadge}}
                                 ${{isDefault ? '<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); padding: 0.15rem 0.5rem; border-radius: 6px;"><i class="fa-solid fa-star"></i> Padrão</span>' : ''}}
                             </div>
                             <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem; flex-wrap: wrap;">
@@ -2528,40 +2699,67 @@ def generate_dashboard():
             const select = document.getElementById('product-select');
             select.innerHTML = '';
             
-            const productIds = Object.keys(embeddedData.products);
+            const productIds = getFilteredProductIds();
+            const noProductsBanner = document.getElementById('no-products-banner');
+            const dashboardContentArea = document.getElementById('dashboard-content-area');
+            const titleEl = document.getElementById('header-product-title');
+            
+            if (productIds.length === 0) {{
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.innerText = '(Nenhum produto cadastrado)';
+                select.appendChild(opt);
+                select.disabled = true;
+                if (noProductsBanner) {{
+                    noProductsBanner.style.display = 'flex';
+                    const noTitle = document.getElementById('no-products-title');
+                    const noDesc = document.getElementById('no-products-desc');
+                    if (currentProfile && !currentProfile.is_admin) {{
+                        if (noTitle) noTitle.innerText = `Nenhum produto cadastrado para ${{currentProfile.name}}`;
+                        if (noDesc) noDesc.innerText = `Olá, ${{currentProfile.name}}! Você ainda não tem produtos cadastrados para monitoramento. Clique no botão abaixo para adicionar seu primeiro item!`;
+                    }}
+                }}
+                if (dashboardContentArea) dashboardContentArea.style.display = 'none';
+                if (titleEl) titleEl.innerText = 'Nenhum produto cadastrado';
+                return;
+            }}
+            
+            select.disabled = false;
+            if (noProductsBanner) noProductsBanner.style.display = 'none';
+            if (dashboardContentArea) dashboardContentArea.style.display = 'block';
+            
             productIds.forEach(id => {{
                 const p = embeddedData.products[id];
                 const opt = document.createElement('option');
                 opt.value = id;
                 const statusTag = p.active === false ? ' (Pausado)' : '';
-                opt.innerText = `${{p.name}} [${{p.currency || 'USD'}}]${{statusTag}}`;
+                const ownerTag = (currentProfile && currentProfile.is_admin && p.profile) ? ` [${{p.profile}}]` : '';
+                opt.innerText = `${{p.name}} [${{p.currency || 'USD'}}]${{ownerTag}}${{statusTag}}`;
                 select.appendChild(opt);
             }});
             
-            select.addEventListener('change', (e) => {{
+            select.onchange = (e) => {{
                 renderProduct(e.target.value);
-            }});
+            }};
             
             const intervalSelect = document.getElementById('select-search-interval');
-            if (embeddedData.search_interval) {{
+            if (embeddedData.search_interval && intervalSelect) {{
                 intervalSelect.value = embeddedData.search_interval;
                 updateSchedulerStatusText(embeddedData.search_interval);
             }}
             
-            if (productIds.length > 0) {{
-                const savedDefault = localStorage.getItem('caca_precos_default_product');
-                let initialProduct = null;
-                if (savedDefault && productIds.includes(savedDefault)) {{
-                    initialProduct = savedDefault;
-                }} else if (embeddedData.default_product && productIds.includes(embeddedData.default_product)) {{
-                    initialProduct = embeddedData.default_product;
-                }} else {{
-                    const firstActive = productIds.find(id => embeddedData.products[id].active !== false);
-                    initialProduct = firstActive || productIds[0];
-                }}
-                select.value = initialProduct;
-                renderProduct(initialProduct);
+            const savedDefault = localStorage.getItem('caca_precos_default_product');
+            let initialProduct = null;
+            if (savedDefault && productIds.includes(savedDefault)) {{
+                initialProduct = savedDefault;
+            }} else if (embeddedData.default_product && productIds.includes(embeddedData.default_product)) {{
+                initialProduct = embeddedData.default_product;
+            }} else {{
+                const firstActive = productIds.find(id => embeddedData.products[id].active !== false);
+                initialProduct = firstActive || productIds[0];
             }}
+            select.value = initialProduct;
+            renderProduct(initialProduct);
         }}
         
         // Save price listener
@@ -2746,6 +2944,9 @@ def generate_dashboard():
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Cadastrando...';
             
+            const profSel = document.getElementById('new-prod-profile');
+            const targetProfile = (currentProfile && currentProfile.is_admin && profSel && profSel.value) ? profSel.value : (currentProfile ? currentProfile.id : 'fauzer');
+            
             try {{
                 const res = await fetch('/api/products/add', {{
                     method: 'POST',
@@ -2757,7 +2958,8 @@ def generate_dashboard():
                         active: true,
                         stores: stores,
                         exclude_keywords: excludeKeywords,
-                        relevancy_keywords: relevancyKeywords
+                        relevancy_keywords: relevancyKeywords,
+                        profile: targetProfile
                     }})
                 }});
                 const data = await res.json();
@@ -2900,7 +3102,7 @@ def fetch_usd_brl_rate():
 
 def git_push_update():
     print(f"[{datetime.now()}] Attempting automatic git push...")
-    base_dir = "/Users/macstudio-maj/.gemini/antigravity/scratch/yamaha-yc73-tracker"
+    base_dir = BASE_DIR
     
     if not os.path.exists(os.path.join(base_dir, ".git")):
         print("Git repository not initialized. Skipping auto git push.")
@@ -2988,7 +3190,8 @@ def run_tracker():
                 "active": False,
                 "target_price": target_price,
                 "best_deal": prev_best,
-                "deals": deals
+                "deals": deals,
+                "profile": prod.get("profile", "fauzer")
             }
             continue
             
@@ -3045,7 +3248,8 @@ def run_tracker():
             "active": True,
             "target_price": target_price,
             "best_deal": best_deal,
-            "deals": deals
+            "deals": deals,
+            "profile": prod.get("profile", "fauzer")
         }
         
         # macOS Notification

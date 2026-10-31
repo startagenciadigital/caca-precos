@@ -1,5 +1,19 @@
 {
   "search_interval": "3h",
   "access_pin": "140608",
-  "default_product": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera"
+  "default_product": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera",
+  "profiles": [
+    {
+      "id": "fauzer",
+      "name": "Fauzer",
+      "pin": "140608",
+      "is_admin": true
+    },
+    {
+      "id": "marcella",
+      "name": "Marcella",
+      "pin": "1218",
+      "is_admin": false
+    }
+  ]
 }
