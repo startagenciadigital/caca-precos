@@ -1193,7 +1193,7 @@
         "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
         "price": 286.68,
         "price_str": "R$ 286.68",
-        "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=19&amp;type=product&amp;tracking_id=37b01646-af18-4435-80b9-7d505293f8a4&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
+        "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=24&amp;type=product&amp;tracking_id=b97f5b8f-6e43-4ee3-be93-e86de141be10&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
         "source": "Mercado Livre"
       },
       "deals": [
@@ -1295,6 +1295,15 @@
           "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
           "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=19&amp;type=product&amp;tracking_id=37b01646-af18-4435-80b9-7d505293f8a4&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-10-31 00:38:54",
+          "price_raw": "R$ 286.68",
+          "usd_price": 286.68,
+          "retailer": "Mercado Livre",
+          "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
+          "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=24&amp;type=product&amp;tracking_id=b97f5b8f-6e43-4ee3-be93-e86de141be10&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
+          "status": "TARGET MET!"
         }
       ],
       "profile": "fauzer"
@@ -1305,10 +1314,10 @@
       "active": true,
       "target_price": 500.0,
       "best_deal": {
-        "title": "Hollyland Lark M2 Type C - Microfone sem fio Lavalier, alcance de 300 M, \u00e1udio de alta fidelidade, cancelamento de ru\u00eddo",
-        "price": 649.76,
-        "price_str": "R$ 649.76",
-        "link": "https://www.mercadolivre.com.br/hollyland-lark-m2-type-c-microfone-sem-fio-lavalier-alcance-de-300-m-audio-de-alta-fidelidade-cancelamento-de-ruido/p/MLB56468486#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=grid&amp;position=31&amp;type=product&amp;tracking_id=b0e1f653-3670-4e65-a61f-e8371201c4f9&amp;overlay_label_capability=not_apply&amp;wid=MLB7784541694&amp;sid=search",
+        "title": "Hollyland LARK A2 Microfone sem fio \u00fanico USB-C 1TX + 1RX 200m Para Vlog",
+        "price": 285.88,
+        "price_str": "R$ 285.88",
+        "link": "https://click1.mercadolivre.com.br/mclics/clicks/external/MLB/count",
         "source": "Mercado Livre"
       },
       "deals": [
@@ -1365,13 +1374,22 @@
           "title": "Hollyland Lark M2 Type C - Microfone sem fio Lavalier, alcance de 300 M, \u00e1udio de alta fidelidade, cancelamento de ru\u00eddo",
           "link": "https://www.mercadolivre.com.br/hollyland-lark-m2-type-c-microfone-sem-fio-lavalier-alcance-de-300-m-audio-de-alta-fidelidade-cancelamento-de-ruido/p/MLB56468486#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=grid&amp;position=31&amp;type=product&amp;tracking_id=b0e1f653-3670-4e65-a61f-e8371201c4f9&amp;overlay_label_capability=not_apply&amp;wid=MLB7784541694&amp;sid=search",
           "status": "Searching..."
+        },
+        {
+          "date": "2026-10-31 00:39:31",
+          "price_raw": "R$ 285.88",
+          "usd_price": 285.88,
+          "retailer": "Mercado Livre",
+          "title": "Hollyland LARK A2 Microfone sem fio \u00fanico USB-C 1TX + 1RX 200m Para Vlog",
+          "link": "https://click1.mercadolivre.com.br/mclics/clicks/external/MLB/count",
+          "status": "TARGET MET!"
         }
       ],
       "profile": "fauzer"
     }
   },
   "usd_to_brl_rate": 5.4397,
-  "last_search_time": "2026-10-30 23:41:51",
+  "last_search_time": "2026-10-31 00:38:40",
   "search_interval": "3h",
   "default_product": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera"
 }
