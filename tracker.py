@@ -392,50 +392,131 @@ def get_log_file(product_id):
     else:
         return os.path.join(BASE_DIR, f"deals_{product_id}.md")
 
+def fetch_pages_playwright(stores_dict):
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        print(f"[{datetime.now()}] Playwright not installed in current environment.")
+        return {}
+        
+    print(f"[{datetime.now()}] Fetching {len(stores_dict)} stores via Playwright Chromium...")
+    result = {}
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=[
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-blink-features=AutomationControlled'
+                ]
+            )
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                viewport={"width": 1366, "height": 768},
+                locale="pt-BR"
+            )
+            context.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            
+            for name, raw_url in stores_dict.items():
+                try:
+                    print(f"[{datetime.now()}] Loading {name}: {raw_url[:80]}...")
+                    page = context.new_page()
+                    page.goto(raw_url, timeout=35000, wait_until="domcontentloaded")
+                    page.wait_for_timeout(4000)
+                    result[name] = page.content()
+                    page.close()
+                except Exception as e:
+                    print(f"[{datetime.now()}] Error loading {name} with Playwright: {e}")
+                    # Urllib fallback for this store
+                    try:
+                        import urllib.request
+                        req = urllib.request.Request(raw_url, headers={
+                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                            'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+                        })
+                        with urllib.request.urlopen(req, timeout=15) as resp:
+                            result[name] = resp.read().decode('utf-8', errors='ignore')
+                    except Exception as e2:
+                        print(f"[{datetime.now()}] HTTP fallback error for {name}: {e2}")
+            browser.close()
+    except Exception as e:
+        print(f"[{datetime.now()}] Playwright execution error: {e}")
+    return result
+
 def fetch_pages_dynamic(stores_dict):
     if not stores_dict:
         return {}
         
-    print(f"[{datetime.now()}] Fetching {len(stores_dict)} stores via Safari AppleScript...")
-    script_lines = [
-        'tell application "Safari"',
-        '    if not (exists window 1) then',
-        '        make new document',
-        '    end if'
-    ]
+    is_ci = bool(os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS"))
+    is_macos = sys.platform == "darwin"
     
-    delimiters = []
-    store_names = list(stores_dict.keys())
-    
-    for i, name in enumerate(store_names):
-        raw_url = stores_dict[name]
-        var_name = f"html_{i}"
-        script_lines.append(f'    -- Fetch {name}')
-        script_lines.append(f'    open location "{raw_url}"')
-        script_lines.append('    delay 7')
-        script_lines.append(f'    set {var_name} to source of front document')
-        script_lines.append('    try')
-        script_lines.append('        close current tab of front window')
-        script_lines.append('    end try')
-        delimiters.append(var_name)
+    # On local macOS (interactive session), use Safari AppleScript
+    if is_macos and not is_ci:
+        try:
+            print(f"[{datetime.now()}] Fetching {len(stores_dict)} stores via Safari AppleScript...")
+            script_lines = [
+                'tell application "Safari"',
+                '    if not (exists window 1) then',
+                '        make new document',
+                '    end if'
+            ]
+            
+            delimiters = []
+            store_names = list(stores_dict.keys())
+            
+            for i, name in enumerate(store_names):
+                raw_url = stores_dict[name]
+                var_name = f"html_{i}"
+                script_lines.append(f'    -- Fetch {name}')
+                script_lines.append(f'    open location "{raw_url}"')
+                script_lines.append('    delay 7')
+                script_lines.append(f'    set {var_name} to source of front document')
+                script_lines.append('    try')
+                script_lines.append('        close current tab of front window')
+                script_lines.append('    end try')
+                delimiters.append(var_name)
+                
+            delimiter_expr = ' & "===DELIMITER===" & '.join(delimiters)
+            script_lines.append(f'    return {delimiter_expr}')
+            script_lines.append('end tell')
+            
+            applescript = "\n".join(script_lines)
+            
+            res = subprocess.run(["osascript", "-e", applescript], capture_output=True, text=True)
+            if res.returncode == 0:
+                parts = res.stdout.split("===DELIMITER===")
+                result = {}
+                for i, name in enumerate(store_names):
+                    if i < len(parts):
+                        result[name] = parts[i]
+                return result
+            else:
+                print(f"AppleScript Error: {res.stderr}. Trying Playwright / HTTP fallback...")
+        except Exception as e:
+            print(f"Safari execution error: {e}. Trying Playwright / HTTP fallback...")
+            
+    # Try Playwright
+    pw_res = fetch_pages_playwright(stores_dict)
+    if pw_res:
+        return pw_res
         
-    delimiter_expr = ' & "===DELIMITER===" & '.join(delimiters)
-    script_lines.append(f'    return {delimiter_expr}')
-    script_lines.append('end tell')
-    
-    applescript = "\n".join(script_lines)
-    
-    res = subprocess.run(["osascript", "-e", applescript], capture_output=True, text=True)
-    if res.returncode != 0:
-        print(f"AppleScript Error: {res.stderr}")
-        return {}
-        
-    parts = res.stdout.split("===DELIMITER===")
-    result = {}
-    for i, name in enumerate(store_names):
-        if i < len(parts):
-            result[name] = parts[i]
-    return result
+    # HTTP requests fallback
+    print(f"[{datetime.now()}] Fetching stores via HTTP fallback...")
+    res_fallback = {}
+    import urllib.request
+    for name, raw_url in stores_dict.items():
+        try:
+            req = urllib.request.Request(raw_url, headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+            })
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                res_fallback[name] = resp.read().decode('utf-8', errors='ignore')
+        except Exception as e:
+            print(f"HTTP fallback error for {name}: {e}")
+    return res_fallback
 
 def parse_ebay(html, relevancy_keywords, exclude_keywords, rate):
     if not html:
@@ -1724,6 +1805,10 @@ def generate_dashboard():
                 <p>Monitorando: <strong id="header-product-title" style="color: var(--accent-secondary); font-weight: 700;">Carregando...</strong> &bull; Rastreador Inteligente em Tempo Real</p>
             </div>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button id="btn-gh-settings" onclick="openGitHubModal();" class="btn-action" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25);" title="Configurar conexão GitHub para uso online">
+                    <span id="gh-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #64748b; display: inline-block;"></span>
+                    <i class="fa-brands fa-github"></i> <span id="gh-badge-text">GitHub Online</span>
+                </button>
                 <a href="#" onclick="window.location.reload();" class="btn-action btn-refresh">
                     <i class="fa-solid fa-rotate-right"></i> Atualizar
                 </a>
@@ -2004,6 +2089,67 @@ def generate_dashboard():
         </div>
     </div>
     
+    <!-- Modal Configuração GitHub Online -->
+    <div id="modal-github-config" class="modal-overlay" style="display: none;">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <span style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-brands fa-github" style="color: #38bdf8;"></i> Conexão GitHub Online
+                    </span>
+                </div>
+                <button type="button" onclick="closeGitHubModal();" style="background: none; border: none; color: var(--text-secondary); font-size: 1.3rem; cursor: pointer;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                    Para <strong>cadastrar produtos, alterar preços e disparar varreduras direto pelo GitHub Pages</strong> (sem precisar do Mac ligado), você só precisa informar seu Token Pessoal do GitHub uma única vez neste dispositivo.
+                </p>
+
+                <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem;">
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #38bdf8; display: flex; align-items: center; gap: 0.4rem;">
+                        <i class="fa-solid fa-circle-info"></i> Passo 1: Como gerar seu token gratuito (30 segundos)
+                    </span>
+                    <ol style="margin: 0; padding-left: 1.25rem; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+                        <li>Clique no botão abaixo para abrir a página de criação de tokens do GitHub.</li>
+                        <li>Marque as caixas <strong>repo</strong> (acesso ao repositório) e <strong>workflow</strong> (disparo de buscas).</li>
+                        <li>Role até o final e clique em <em>Generate token</em>. Depois copie o código gerado.</li>
+                    </ol>
+                    <a href="https://github.com/settings/tokens/new?scopes=repo,workflow&description=CacaPrecos-Painel-Online" target="_blank" class="btn-action" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); text-align: center; justify-content: center; font-size: 0.85rem; padding: 0.55rem; text-decoration: none; margin-top: 0.25rem;">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir tela de criação de Token no GitHub
+                    </a>
+                </div>
+
+                <div>
+                    <label for="gh-token-input" style="font-size: 0.85rem; font-weight: 600; color: #fff; display: block; margin-bottom: 0.4rem;">
+                        Passo 2: Cole seu Token aqui
+                    </label>
+                    <input type="password" id="gh-token-input" placeholder="ghp_... ou github_pat_..." style="width: 100%; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.6); color: #fff; font-size: 0.9rem; font-family: monospace;">
+                    <span style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.3rem; display: block;">
+                        O token fica guardado com segurança apenas na memória do seu navegador neste dispositivo (localStorage).
+                    </span>
+                </div>
+
+                <div id="gh-test-result" style="display: none; padding: 0.75rem; border-radius: 10px; font-size: 0.85rem;"></div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <button type="button" onclick="disconnectGitHubToken();" class="btn-action" style="background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.85rem;">
+                        <i class="fa-solid fa-trash"></i> Desconectar
+                    </button>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button type="button" onclick="testGitHubConnection();" class="btn-action btn-refresh" style="font-size: 0.85rem;">
+                            <i class="fa-solid fa-plug"></i> Testar Conexão
+                        </button>
+                        <button type="button" onclick="saveGitHubModalToken();" class="btn-action" style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; font-weight: 700; font-size: 0.85rem;">
+                            <i class="fa-solid fa-check"></i> Salvar Token
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
         const encryptedPayloads = {encrypted_payloads_json};
         const encryptedPayload = {encrypted_payload_json};
@@ -2013,6 +2159,251 @@ def generate_dashboard():
         let activeProfileFilter = 'all';
         let chartInstance = null;
         let selectedCurrency = 'BRL';
+        
+        // ==========================================
+        // GITHUB ONLINE INTEGRATION LAYER
+        // ==========================================
+        const GITHUB_REPO_OWNER = 'startagenciadigital';
+        const GITHUB_REPO_NAME = 'caca-precos';
+        const GITHUB_WORKFLOW_FILE = 'tracker.yml';
+
+        function isOnlineMode() {{
+            return window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        }}
+
+        function getGitHubToken() {{
+            return localStorage.getItem('caca_precos_gh_token') || '';
+        }}
+
+        function openGitHubModal() {{
+            const input = document.getElementById('gh-token-input');
+            if (input) input.value = getGitHubToken();
+            const resEl = document.getElementById('gh-test-result');
+            if (resEl) resEl.style.display = 'none';
+            document.getElementById('modal-github-config').style.display = 'flex';
+        }}
+
+        function closeGitHubModal() {{
+            document.getElementById('modal-github-config').style.display = 'none';
+        }}
+
+        function saveGitHubModalToken() {{
+            const input = document.getElementById('gh-token-input');
+            const token = input ? input.value.trim() : '';
+            if (!token) {{
+                alert("Por favor, cole o token do GitHub antes de salvar.");
+                return;
+            }}
+            localStorage.setItem('caca_precos_gh_token', token);
+            updateGitHubUI();
+            alert("Token do GitHub salvo com sucesso neste aparelho!");
+            closeGitHubModal();
+        }}
+
+        function disconnectGitHubToken() {{
+            if (confirm("Deseja remover o token do GitHub deste dispositivo?")) {{
+                localStorage.removeItem('caca_precos_gh_token');
+                const input = document.getElementById('gh-token-input');
+                if (input) input.value = '';
+                updateGitHubUI();
+                alert("Token desconectado.");
+                closeGitHubModal();
+            }}
+        }}
+
+        async function testGitHubConnection() {{
+            const input = document.getElementById('gh-token-input');
+            const token = input ? input.value.trim() : getGitHubToken();
+            const resEl = document.getElementById('gh-test-result');
+            if (!token) {{
+                alert("Insira um token para testar.");
+                return;
+            }}
+            resEl.style.display = 'block';
+            resEl.style.background = 'rgba(56, 189, 248, 0.15)';
+            resEl.style.color = '#38bdf8';
+            resEl.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Testando acesso ao repositório...';
+            
+            try {{
+                const res = await fetch(`https://api.github.com/repos/${{GITHUB_REPO_OWNER}}/${{GITHUB_REPO_NAME}}`, {{
+                    headers: {{
+                        'Authorization': `Bearer ${{token}}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }}
+                }});
+                if (res.ok) {{
+                    const repoData = await res.json();
+                    resEl.style.background = 'rgba(16, 185, 129, 0.15)';
+                    resEl.style.color = '#10b981';
+                    resEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Conexão bem-sucedida com <strong>${{repoData.full_name}}</strong>! Permissões verificadas.`;
+                }} else {{
+                    const err = await res.json().catch(() => ({{}}));
+                    resEl.style.background = 'rgba(239, 68, 68, 0.15)';
+                    resEl.style.color = '#f87171';
+                    resEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Erro (${{res.status}}): ${{err.message || 'Token inválido ou sem permissão de acesso ao repositório.'}}`;
+                }}
+            }} catch (e) {{
+                resEl.style.background = 'rgba(239, 68, 68, 0.15)';
+                resEl.style.color = '#f87171';
+                resEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Falha de rede: ${{e.message}}`;
+            }}
+        }}
+
+        function updateGitHubUI() {{
+            const badge = document.getElementById('gh-badge-text');
+            const dot = document.getElementById('gh-status-dot');
+            const token = getGitHubToken();
+            if (!badge) return;
+            if (token) {{
+                badge.innerText = 'GitHub Online';
+                if (dot) {{
+                    dot.style.background = '#10b981';
+                    dot.title = 'Conectado à nuvem GitHub Actions';
+                }}
+            }} else {{
+                badge.innerText = isOnlineMode() ? 'Conectar GitHub' : 'GitHub (Local)';
+                if (dot) {{
+                    dot.style.background = isOnlineMode() ? '#f59e0b' : '#64748b';
+                    dot.title = isOnlineMode() ? 'Necessário token para ações online' : 'Usando servidor Python local';
+                }}
+            }}
+        }}
+
+        async function promptGitHubTokenIfNeeded() {{
+            const token = getGitHubToken();
+            if (!token) {{
+                openGitHubModal();
+                throw new Error("TOKEN_REQUIRED");
+            }}
+            return token;
+        }}
+
+        async function fetchGitHubFile(path) {{
+            const token = await promptGitHubTokenIfNeeded();
+            const res = await fetch(`https://api.github.com/repos/${{GITHUB_REPO_OWNER}}/${{GITHUB_REPO_NAME}}/contents/${{path}}?ref=main&t=${{Date.now()}}`, {{
+                headers: {{
+                    'Authorization': `Bearer ${{token}}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }}
+            }});
+            if (!res.ok) {{
+                const errData = await res.json().catch(() => ({{}}));
+                throw new Error(errData.message || `Erro ${{res.status}} ao carregar ${{path}} do GitHub`);
+            }}
+            const data = await res.json();
+            const binary = atob(data.content.replace(/\s/g, ''));
+            const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+            const decodedStr = new TextDecoder('utf-8').decode(bytes);
+            return {{
+                sha: data.sha,
+                content: JSON.parse(decodedStr)
+            }};
+        }}
+
+        async function updateGitHubFile(path, newContentObj, sha, commitMsg) {{
+            const token = await promptGitHubTokenIfNeeded();
+            const jsonStr = JSON.stringify(newContentObj, null, 2);
+            const bytes = new TextEncoder().encode(jsonStr);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {{
+                binary += String.fromCharCode(bytes[i]);
+            }}
+            const base64Content = btoa(binary);
+            
+            const res = await fetch(`https://api.github.com/repos/${{GITHUB_REPO_OWNER}}/${{GITHUB_REPO_NAME}}/contents/${{path}}`, {{
+                method: 'PUT',
+                headers: {{
+                    'Authorization': `Bearer ${{token}}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                }},
+                body: JSON.stringify({{
+                    message: commitMsg,
+                    content: base64Content,
+                    sha: sha,
+                    branch: 'main'
+                }})
+            }});
+            if (!res.ok) {{
+                const errData = await res.json().catch(() => ({{}}));
+                throw new Error(errData.message || `Erro ${{res.status}} ao salvar no GitHub`);
+            }}
+            return await res.json();
+        }}
+
+        async function dispatchGitHubWorkflow() {{
+            const token = await promptGitHubTokenIfNeeded();
+            const res = await fetch(`https://api.github.com/repos/${{GITHUB_REPO_OWNER}}/${{GITHUB_REPO_NAME}}/actions/workflows/${{GITHUB_WORKFLOW_FILE}}/dispatches`, {{
+                method: 'POST',
+                headers: {{
+                    'Authorization': `Bearer ${{token}}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                }},
+                body: JSON.stringify({{
+                    ref: 'main'
+                }})
+            }});
+            if (!res.ok) {{
+                const errData = await res.json().catch(() => ({{}}));
+                throw new Error(errData.message || `Erro ${{res.status}} ao acionar busca no GitHub Actions`);
+            }}
+            return true;
+        }}
+
+        async function getLatestWorkflowRun() {{
+            const token = getGitHubToken();
+            const headers = {{ 'Accept': 'application/vnd.github.v3+json' }};
+            if (token) headers['Authorization'] = `Bearer ${{token}}`;
+            
+            const res = await fetch(`https://api.github.com/repos/${{GITHUB_REPO_OWNER}}/${{GITHUB_REPO_NAME}}/actions/runs?per_page=1&t=${{Date.now()}}`, {{
+                headers: headers
+            }});
+            if (res.ok) {{
+                const data = await res.json();
+                if (data.workflow_runs && data.workflow_runs.length > 0) {{
+                    return data.workflow_runs[0];
+                }}
+            }}
+            return null;
+        }}
+
+        async function checkOnlineSearchStatus() {{
+            try {{
+                const run = await getLatestWorkflowRun();
+                const statusBanner = document.getElementById('search-status-banner');
+                const statusText = document.getElementById('search-status-text');
+                if (run) {{
+                    if (run.status === 'in_progress' || run.status === 'queued') {{
+                        setSearchingState(true);
+                        if (statusText) {{
+                            const stepName = run.status === 'queued' ? 'Na fila de execução' : 'Rastreando lojas em segundo plano';
+                            statusText.innerText = `GitHub Actions #${{run.run_number}}: ${{stepName}}...`;
+                        }}
+                        setTimeout(checkOnlineSearchStatus, 5000);
+                    }} else if (run.status === 'completed') {{
+                        if (btnNewSearch && btnNewSearch.disabled) {{
+                            setSearchingState(false);
+                            if (run.conclusion === 'success') {{
+                                alert("Varredura concluída com sucesso pelo GitHub Actions! Atualizando dados da página...");
+                                window.location.reload();
+                            }} else {{
+                                alert(`A varredura no GitHub Actions finalizou com status: ${{run.conclusion}}. Você pode verificar os detalhes na aba Actions do repositório.`);
+                            }}
+                        }}
+                    }}
+                }}
+            }} catch (e) {{
+                console.log("Status check notice:", e);
+            }}
+        }}
+
+        function slugifyJs(text) {{
+            return text.toString().toLowerCase().trim()
+                .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }}
         
         async function decryptPayload(pin, payload) {{
             const salt = Uint8Array.from(atob(payload.salt), c => c.charCodeAt(0));
@@ -2626,6 +3017,32 @@ def generate_dashboard():
         }}
         
         async function toggleProductActive(productId, activeState) {{
+            if (isOnlineMode()) {{
+                try {{
+                    const fileData = await fetchGitHubFile('products.json');
+                    const productsList = fileData.content;
+                    const prod = productsList.find(p => p.id === productId);
+                    if (prod) {{
+                        prod.active = activeState;
+                        await updateGitHubFile('products.json', productsList, fileData.sha, `update(products): alternar status de ${{productId}} para ${{activeState}}`);
+                    }}
+                    if (embeddedData && embeddedData.products && embeddedData.products[productId]) {{
+                        embeddedData.products[productId].active = activeState;
+                    }}
+                    renderManageList();
+                    const sel = document.getElementById('product-select').value;
+                    if (sel === productId) {{
+                        renderProduct(productId);
+                    }}
+                    alert("Status do produto atualizado com sucesso no GitHub!");
+                }} catch (err) {{
+                    if (err.message !== "TOKEN_REQUIRED") {{
+                        alert("Erro ao alterar status online: " + err.message);
+                    }}
+                }}
+                return;
+            }}
+            
             try {{
                 const res = await fetch('/api/products/toggle-active', {{
                     method: 'POST',
@@ -2652,6 +3069,26 @@ def generate_dashboard():
             if (!confirm(`Tem certeza que deseja remover o produto "${{productName}}"?`)) {{
                 return;
             }}
+            
+            if (isOnlineMode()) {{
+                try {{
+                    const fileData = await fetchGitHubFile('products.json');
+                    const productsList = fileData.content.filter(p => p.id !== productId);
+                    await updateGitHubFile('products.json', productsList, fileData.sha, `refactor(products): remover ${{productName}} (${{productId}})`);
+                    if (embeddedData && embeddedData.products) {{
+                        delete embeddedData.products[productId];
+                    }}
+                    initSelector();
+                    renderManageList();
+                    alert(`Produto "${{productName}}" removido com sucesso no GitHub!`);
+                }} catch (err) {{
+                    if (err.message !== "TOKEN_REQUIRED") {{
+                        alert("Erro ao excluir produto online: " + err.message);
+                    }}
+                }}
+                return;
+            }}
+            
             const deleteHistory = confirm(`Deseja também APAGAR todos os arquivos de histórico e dados acumulados de "${{productName}}"?\n\nClique em OK para APAGAR o histórico.\nClique em Cancelar para MANTER o histórico arquivado.`);
             
             try {{
@@ -2774,6 +3211,31 @@ def generate_dashboard():
             
             btnSavePrice.disabled = true;
             btnSavePrice.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Salvando...';
+            
+            if (isOnlineMode()) {{
+                try {{
+                    const fileData = await fetchGitHubFile('products.json');
+                    const productsList = fileData.content;
+                    const prod = productsList.find(p => p.id === productId);
+                    if (prod) {{
+                        prod.target_price = newPrice;
+                        await updateGitHubFile('products.json', productsList, fileData.sha, `update(price): alterar preço-alvo de ${{productId}} para ${{newPrice}}`);
+                    }}
+                    if (embeddedData && embeddedData.products && embeddedData.products[productId]) {{
+                        embeddedData.products[productId].target_price = newPrice;
+                    }}
+                    renderProduct(productId);
+                    alert("Preço-alvo atualizado com sucesso no GitHub!");
+                }} catch (err) {{
+                    if (err.message !== "TOKEN_REQUIRED") {{
+                        alert("Erro ao salvar preço online: " + err.message);
+                    }}
+                }} finally {{
+                    btnSavePrice.disabled = false;
+                    btnSavePrice.innerHTML = 'Salvar Preço';
+                }}
+                return;
+            }}
             
             try {{
                 const res = await fetch('/update-target-price', {{
@@ -2947,6 +3409,57 @@ def generate_dashboard():
             const profSel = document.getElementById('new-prod-profile');
             const targetProfile = (currentProfile && currentProfile.is_admin && profSel && profSel.value) ? profSel.value : (currentProfile ? currentProfile.id : 'fauzer');
             
+            if (isOnlineMode()) {{
+                try {{
+                    const fileData = await fetchGitHubFile('products.json');
+                    const productsList = Array.isArray(fileData.content) ? fileData.content : [];
+                    
+                    const prodId = slugifyJs(name);
+                    const newProd = {{
+                        id: prodId,
+                        name: name,
+                        currency: selectedCurrency,
+                        target_price: targetPrice,
+                        active: true,
+                        exclude_keywords: excludeKeywords,
+                        relevancy_keywords: relevancyKeywords,
+                        stores: stores,
+                        search_queries: {{}},
+                        profile: targetProfile
+                    }};
+                    for (const [sname, surl] of Object.entries(stores)) {{
+                        newProd.search_queries[sname] = name;
+                    }}
+                    
+                    const existingIdx = productsList.findIndex(p => p.id === prodId);
+                    if (existingIdx >= 0) {{
+                        productsList[existingIdx] = newProd;
+                    }} else {{
+                        productsList.push(newProd);
+                    }}
+                    
+                    await updateGitHubFile('products.json', productsList, fileData.sha, `feat(products): cadastrar ${{name}} via painel online`);
+                    
+                    // Dispatch GitHub Actions workflow
+                    try {{
+                        await dispatchGitHubWorkflow();
+                    }} catch (e) {{
+                        console.log("Auto workflow dispatch notice:", e);
+                    }}
+                    
+                    alert(`Produto "${{name}}" cadastrado com sucesso no GitHub! O robô do GitHub Actions já foi acionado.`);
+                    window.location.reload();
+                }} catch (err) {{
+                    if (err.message !== "TOKEN_REQUIRED") {{
+                        alert("Erro ao cadastrar produto online: " + err.message);
+                    }}
+                }} finally {{
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Salvar e Ativar Monitoramento';
+                }}
+                return;
+            }}
+            
             try {{
                 const res = await fetch('/api/products/add', {{
                     method: 'POST',
@@ -3013,6 +3526,23 @@ def generate_dashboard():
         }}
         
         btnNewSearch.addEventListener('click', async () => {{
+            if (isOnlineMode()) {{
+                try {{
+                    setSearchingState(true);
+                    const statusText = document.getElementById('search-status-text');
+                    if (statusText) statusText.innerText = 'Acionando busca no GitHub Actions...';
+                    await dispatchGitHubWorkflow();
+                    if (statusText) statusText.innerText = 'Varredura iniciada no GitHub Actions! Aguardando robô...';
+                    setTimeout(checkOnlineSearchStatus, 4000);
+                }} catch (err) {{
+                    setSearchingState(false);
+                    if (err.message !== "TOKEN_REQUIRED") {{
+                        alert("Erro ao disparar busca online: " + err.message);
+                    }}
+                }}
+                return;
+            }}
+            
             setSearchingState(true);
             try {{
                 const res = await fetch('/run-search', {{ method: 'POST' }});
@@ -3037,6 +3567,12 @@ def generate_dashboard():
         }});
         
         document.addEventListener('DOMContentLoaded', async () => {{
+            updateGitHubUI();
+            
+            if (isOnlineMode()) {{
+                checkOnlineSearchStatus();
+            }}
+            
             const savedPin = localStorage.getItem('caca_precos_pin');
             if (savedPin) {{
                 const success = await attemptUnlock(savedPin, true);
@@ -3113,6 +3649,12 @@ def git_push_update():
         if res.returncode != 0:
             print("No remote origin 'origin' configured. Skipping auto git push.")
             return
+            
+        # Ensure git user is configured if not set
+        user_res = subprocess.run(["git", "config", "user.name"], cwd=base_dir, capture_output=True, text=True)
+        if not user_res.stdout.strip():
+            subprocess.run(["git", "config", "user.name", "github-actions[bot]"], cwd=base_dir)
+            subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], cwd=base_dir)
             
         subprocess.run(["git", "add", "dashboard.html", "index.html", "data.json", "products.json", "config.json", "deals.md", "favicon.svg", "favicon.ico", "favicon.png"], cwd=base_dir)
         subprocess.run(["git", "add", "deals_*.md"], cwd=base_dir)
@@ -3263,11 +3805,15 @@ def run_tracker():
             else:
                 notif_subtitle = f"Melhor preço: {best_deal['price_str']} ({source})"
                 notif_msg = f"Oferta encontrada no {source}. Detalhes no Dashboard."
-            applescript = f'display notification "{notif_msg}" with title "{notif_title}" subtitle "{notif_subtitle}" sound name "Glass"'
-            subprocess.run(["osascript", "-e", applescript])
-        else:
-            applescript = f'display notification "Busca finalizada para {prod_name}. Nenhuma oferta encontrada hoje." with title "Caça-Preços Web ({prod_name})" sound name "Pop"'
-            subprocess.run(["osascript", "-e", applescript])
+        if sys.platform == "darwin" and not os.environ.get("GITHUB_ACTIONS"):
+            try:
+                if best_deal and best_deal['price'] > 0:
+                    applescript = f'display notification "{notif_msg}" with title "{notif_title}" subtitle "{notif_subtitle}" sound name "Glass"'
+                else:
+                    applescript = f'display notification "Busca finalizada para {prod_name}. Nenhuma oferta encontrada hoje." with title "Caça-Preços Web ({prod_name})" sound name "Pop"'
+                subprocess.run(["osascript", "-e", applescript])
+            except Exception:
+                pass
             
     try:
         with open(DATA_JSON_FILE, 'w') as f:
@@ -3509,6 +4055,11 @@ def start_server():
         server.server_close()
 
 if __name__ == "__main__":
+    if "--run-once" in sys.argv or os.environ.get("GITHUB_ACTIONS"):
+        print(f"[{datetime.now()}] Iniciando execução única (--run-once)...")
+        run_tracker()
+        sys.exit(0)
+        
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         s.bind(('localhost', PORT))
