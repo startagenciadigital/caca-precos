@@ -1844,8 +1844,8 @@ def generate_dashboard():
                     <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 1.2rem;"></i>
                 </div>
                 <div>
-                    <div style="font-weight: 600; color: #fff; font-family: 'Outfit', sans-serif;">Busca em Andamento...</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.15rem;">O Safari está rastreando ofertas nos sites configurados para cada produto ativo.</div>
+                    <div id="search-status-title" style="font-weight: 600; color: #fff; font-family: 'Outfit', sans-serif;">Busca em Andamento...</div>
+                    <div id="search-status-text" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.15rem;">Rastreando ofertas nos sites configurados para cada produto ativo...</div>
                 </div>
             </div>
         </div>
@@ -2356,7 +2356,7 @@ def generate_dashboard():
             const headers = {{ 'Accept': 'application/vnd.github.v3+json' }};
             if (token) headers['Authorization'] = `Bearer ${{token}}`;
             
-            const res = await fetch(`https://api.github.com/repos/${{GITHUB_REPO_OWNER}}/${{GITHUB_REPO_NAME}}/actions/runs?per_page=1&t=${{Date.now()}}`, {{
+            const res = await fetch(`https://api.github.com/repos/${{GITHUB_REPO_OWNER}}/${{GITHUB_REPO_NAME}}/actions/workflows/${{GITHUB_WORKFLOW_FILE}}/runs?per_page=1&t=${{Date.now()}}`, {{
                 headers: headers
             }});
             if (res.ok) {{
@@ -2373,16 +2373,19 @@ def generate_dashboard():
                 const run = await getLatestWorkflowRun();
                 const statusBanner = document.getElementById('search-status-banner');
                 const statusText = document.getElementById('search-status-text');
+                const isSearchingTracked = sessionStorage.getItem('caca_precos_searching') === 'true';
+                
                 if (run) {{
                     if (run.status === 'in_progress' || run.status === 'queued') {{
                         setSearchingState(true);
                         if (statusText) {{
-                            const stepName = run.status === 'queued' ? 'Na fila de execução' : 'Rastreando lojas em segundo plano';
+                            const stepName = run.status === 'queued' ? 'Na fila de execução' : 'Rastreando lojas na nuvem';
                             statusText.innerText = `GitHub Actions #${{run.run_number}}: ${{stepName}}...`;
                         }}
-                        setTimeout(checkOnlineSearchStatus, 5000);
+                        setTimeout(checkOnlineSearchStatus, 4000);
                     }} else if (run.status === 'completed') {{
-                        if (btnNewSearch && btnNewSearch.disabled) {{
+                        if (isSearchingTracked || (btnNewSearch && btnNewSearch.disabled)) {{
+                            sessionStorage.removeItem('caca_precos_searching');
                             setSearchingState(false);
                             if (run.conclusion === 'success') {{
                                 alert("Varredura concluída com sucesso pelo GitHub Actions! Atualizando dados da página...");
@@ -2390,11 +2393,16 @@ def generate_dashboard():
                             }} else {{
                                 alert(`A varredura no GitHub Actions finalizou com status: ${{run.conclusion}}. Você pode verificar os detalhes na aba Actions do repositório.`);
                             }}
+                        }} else {{
+                            setSearchingState(false);
                         }}
                     }}
+                }} else {{
+                    setSearchingState(false);
                 }}
             }} catch (e) {{
                 console.log("Status check notice:", e);
+                setSearchingState(false);
             }}
         }}
 
@@ -3529,6 +3537,7 @@ def generate_dashboard():
             if (isOnlineMode()) {{
                 try {{
                     setSearchingState(true);
+                    sessionStorage.setItem('caca_precos_searching', 'true');
                     const statusText = document.getElementById('search-status-text');
                     if (statusText) statusText.innerText = 'Acionando busca no GitHub Actions...';
                     await dispatchGitHubWorkflow();
@@ -3536,6 +3545,7 @@ def generate_dashboard():
                     setTimeout(checkOnlineSearchStatus, 4000);
                 }} catch (err) {{
                     setSearchingState(false);
+                    sessionStorage.removeItem('caca_precos_searching');
                     if (err.message !== "TOKEN_REQUIRED") {{
                         alert("Erro ao disparar busca online: " + err.message);
                     }}
