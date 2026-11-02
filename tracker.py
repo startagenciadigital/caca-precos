@@ -857,23 +857,38 @@ def parse_amazon_br(html, relevancy_keywords, exclude_keywords):
     blocks = html.split('data-component-type="s-search-result"')
     for block in blocks[1:]:
         title_match = re.search(r'<h2[^>]*>.*?<span[^>]*>([^<]+)</span>', block, re.DOTALL)
-        price_whole = re.search(r'class="a-price-whole">([^<]+)</span>', block)
+        price_offscreen = re.search(r'a-offscreen\">([^<]+)</span>', block)
+        price_whole = re.search(r'class="a-price-whole">([\d\.,]+)', block)
         price_frac = re.search(r'class="a-price-fraction">(\d+)</span>', block)
-        link_match = re.search(r'href="(/[^"]*/dp/[^"/?]+|https://www\.amazon\.com\.br/[^"]*)"', block)
+        link_match = re.search(r'href="(/[^"?]+/dp/[^"/?]+|https://www\.amazon\.com\.br/[^"]*)"', block)
         
-        if title_match and price_whole:
+        price_val = None
+        if price_offscreen:
+            raw_p = price_offscreen.group(1)
+            clean_p = re.sub(r'[^\d,\.]', '', raw_p)
+            if ',' in clean_p and '.' in clean_p:
+                clean_p = clean_p.replace('.', '').replace(',', '.')
+            elif ',' in clean_p:
+                clean_p = clean_p.replace(',', '.')
+            try:
+                price_val = float(clean_p)
+            except Exception:
+                pass
+                
+        if price_val is None and price_whole:
+            whole = re.sub(r'[^\d]', '', price_whole.group(1))
+            frac = price_frac.group(1) if price_frac else "00"
+            try:
+                price_val = float(f"{whole}.{frac}")
+            except Exception:
+                pass
+                
+        if title_match and price_val is not None and price_val > 0:
             title = title_match.group(1).strip()
             title_lower = title.lower()
             if relevancy_keywords and not any(rk.lower() in title_lower for rk in relevancy_keywords):
                 continue
             if exclude_keywords and any(kw.lower() in title_lower for kw in exclude_keywords):
-                continue
-                
-            frac = price_frac.group(1) if price_frac else "00"
-            whole = price_whole.group(1).replace('.', '').replace(',', '').strip()
-            try:
-                price_val = float(f"{whole}.{frac}")
-            except Exception:
                 continue
                 
             url = link_match.group(1) if link_match else "https://www.amazon.com.br"
@@ -3687,6 +3702,7 @@ def git_push_update():
         commit_msg = f"update: automatic price tracking sync {get_now_br().strftime('%Y-%m-%d %H:%M:%S')}"
         subprocess.run(["git", "commit", "-m", commit_msg], cwd=base_dir)
         
+        subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=base_dir)
         push_res = subprocess.run(["git", "push", "origin", "main"], cwd=base_dir, capture_output=True, text=True)
         if push_res.returncode == 0:
             print(f"[{datetime.now()}] Git push successful!")
