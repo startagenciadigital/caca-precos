@@ -1325,6 +1325,15 @@
           "title": "No items found",
           "link": "N/A",
           "status": "Searching..."
+        },
+        {
+          "date": "2026-11-02 17:45:06",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
@@ -1425,6 +1434,15 @@
           "title": "No items found",
           "link": "N/A",
           "status": "Searching..."
+        },
+        {
+          "date": "2026-11-02 17:45:31",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
@@ -1437,7 +1455,7 @@
       "best_deal": null,
       "deals": [
         {
-          "date": "2026-11-02 20:20:48",
+          "date": "2026-11-02 17:20:48",
           "price_raw": "N/A",
           "usd_price": null,
           "retailer": "None",
@@ -1446,7 +1464,7 @@
           "status": "Searching..."
         },
         {
-          "date": "2026-11-02 20:23:58",
+          "date": "2026-11-02 17:23:58",
           "price_raw": "N/A",
           "usd_price": null,
           "retailer": "None",
@@ -1455,7 +1473,16 @@
           "status": "Searching..."
         },
         {
-          "date": "2026-11-02 20:31:33",
+          "date": "2026-11-02 17:31:33",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
+        },
+        {
+          "date": "2026-11-02 17:45:46",
           "price_raw": "N/A",
           "usd_price": null,
           "retailer": "None",
@@ -1468,7 +1495,7 @@
     }
   },
   "usd_to_brl_rate": 5.15,
-  "last_search_time": "2026-11-02 17:30:43",
+  "last_search_time": "2026-11-02 17:44:56",
   "search_interval": "3h",
   "default_product": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera"
 }
