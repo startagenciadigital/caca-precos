@@ -1316,6 +1316,15 @@
           "title": "No items found",
           "link": "N/A",
           "status": "Searching..."
+        },
+        {
+          "date": "2026-11-02 20:30:54",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
@@ -1407,6 +1416,15 @@
           "title": "No items found",
           "link": "N/A",
           "status": "Searching..."
+        },
+        {
+          "date": "2026-11-02 20:31:17",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
@@ -1435,13 +1453,22 @@
           "title": "No items found",
           "link": "N/A",
           "status": "Searching..."
+        },
+        {
+          "date": "2026-11-02 20:31:33",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
     }
   },
   "usd_to_brl_rate": 5.15,
-  "last_search_time": "2026-11-02 20:23:07",
+  "last_search_time": "2026-11-02 20:30:43",
   "search_interval": "3h",
   "default_product": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera"
 }
