@@ -1059,6 +1059,16 @@ def parse_log_file(filepath):
         
     return deals
 
+def get_now_br():
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo("America/Sao_Paulo")).replace(tzinfo=None)
+    except Exception:
+        pass
+    from datetime import timedelta, timezone
+    utc_now = datetime.now(timezone.utc)
+    return (utc_now - timedelta(hours=3)).replace(tzinfo=None)
+
 def format_datetime_br(dt_str):
     try:
         # Check if it has time
@@ -3674,7 +3684,7 @@ def git_push_update():
             print("No changes to commit.")
             return
             
-        commit_msg = f"update: automatic price tracking sync {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        commit_msg = f"update: automatic price tracking sync {get_now_br().strftime('%Y-%m-%d %H:%M:%S')}"
         subprocess.run(["git", "commit", "-m", commit_msg], cwd=base_dir)
         
         push_res = subprocess.run(["git", "push", "origin", "main"], cwd=base_dir, capture_output=True, text=True)
@@ -3702,7 +3712,7 @@ def run_tracker():
     unified_data = {
         "products": {},
         "usd_to_brl_rate": rate,
-        "last_search_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "last_search_time": get_now_br().strftime("%Y-%m-%d %H:%M:%S"),
         "search_interval": config.get("search_interval", "14:00_17:30"),
         "default_product": config.get("default_product")
     }
@@ -3776,7 +3786,7 @@ def run_tracker():
         best_deal = valid_deals[0] if valid_deals else None
         
         log_file = get_log_file(prod_id)
-        log_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_time = get_now_br().strftime("%Y-%m-%d %H:%M:%S")
         best_price_str = best_deal['price_str'] if best_deal else "N/A"
         best_retailer = best_deal['source'] if best_deal else "None"
         best_details = f"[{best_deal['title']}]({best_deal['link']})" if best_deal else "No items found"
@@ -3842,7 +3852,7 @@ def trigger_background_search():
     is_searching = True
     try:
         run_tracker()
-        last_run_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        last_run_time = get_now_br().strftime("%Y-%m-%d %H:%M:%S")
     except Exception as e:
         print(f"Error in background search: {e}")
     finally:
