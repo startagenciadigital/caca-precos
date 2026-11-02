@@ -13,3 +13,4 @@
 | 2026-11-02 20:23:43 | N/A | None | No items found | Searching... |
 | 2026-11-02 20:31:17 | N/A | None | No items found | Searching... |
 | 2026-11-02 17:45:31 | N/A | None | No items found | Searching... |
+| 2026-11-02 18:01:07 | R$ 75.02 | Amazon Brasil | [Kit 2 Microfones Sem Fio Lapela para Celular USB-C e Lightning 2.4GHz com Estojo Carregador, Redução de Ruído e Alcance até 20m](https://www.amazon.com.br) | TARGET MET! |
