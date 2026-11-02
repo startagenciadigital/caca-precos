@@ -1189,13 +1189,7 @@
       "currency": "BRL",
       "active": true,
       "target_price": 450.0,
-      "best_deal": {
-        "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
-        "price": 286.68,
-        "price_str": "R$ 286.68",
-        "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=24&amp;type=product&amp;tracking_id=b97f5b8f-6e43-4ee3-be93-e86de141be10&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
-        "source": "Mercado Livre"
-      },
+      "best_deal": null,
       "deals": [
         {
           "date": "2026-09-14 14:13:59",
@@ -1304,6 +1298,15 @@
           "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
           "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=24&amp;type=product&amp;tracking_id=b97f5b8f-6e43-4ee3-be93-e86de141be10&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-02 20:20:10",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
@@ -1313,13 +1316,7 @@
       "currency": "BRL",
       "active": true,
       "target_price": 500.0,
-      "best_deal": {
-        "title": "Hollyland LARK A2 Microfone sem fio \u00fanico USB-C 1TX + 1RX 200m Para Vlog",
-        "price": 285.88,
-        "price_str": "R$ 285.88",
-        "link": "https://click1.mercadolivre.com.br/mclics/clicks/external/MLB/count",
-        "source": "Mercado Livre"
-      },
+      "best_deal": null,
       "deals": [
         {
           "date": "2026-10-30 17:41:22",
@@ -1383,13 +1380,41 @@
           "title": "Hollyland LARK A2 Microfone sem fio \u00fanico USB-C 1TX + 1RX 200m Para Vlog",
           "link": "https://click1.mercadolivre.com.br/mclics/clicks/external/MLB/count",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-02 20:20:33",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
+        }
+      ],
+      "profile": "fauzer"
+    },
+    "canhao-de-espuma-wap-snow-foam-encaixe-largo-lt-para-lavadoras-cor-inodoros": {
+      "name": "Canh\u00e3o De Espuma Wap Snow Foam Encaixe Largo Lt Para Lavadoras Cor Inodoros",
+      "currency": "BRL",
+      "active": true,
+      "target_price": 200.0,
+      "best_deal": null,
+      "deals": [
+        {
+          "date": "2026-11-02 20:20:48",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
     }
   },
-  "usd_to_brl_rate": 5.4397,
-  "last_search_time": "2026-10-31 00:38:40",
+  "usd_to_brl_rate": 5.15,
+  "last_search_time": "2026-11-02 20:20:00",
   "search_interval": "3h",
   "default_product": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera"
 }
