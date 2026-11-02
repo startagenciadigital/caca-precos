@@ -3,7 +3,7 @@
     "id": "yamaha-yc73",
     "name": "Yamaha YC73",
     "currency": "USD",
-    "target_price": 2150.0,
+    "target_price": 2150,
     "active": false,
     "exclude_keywords": [
       "cable",
@@ -53,7 +53,7 @@
     "id": "yamaha-yc61",
     "name": "Yamaha YC61",
     "currency": "USD",
-    "target_price": 1800.0,
+    "target_price": 1800,
     "active": false,
     "exclude_keywords": [
       "cable",
@@ -103,7 +103,7 @@
     "id": "pneu-michelin-20555-r16",
     "name": "Pneu Michelin 205/55 R16",
     "currency": "BRL",
-    "target_price": 450.0,
+    "target_price": 450,
     "active": true,
     "stores": {
       "Mercado Livre": "https://lista.mercadolivre.com.br/pneu-michelin-205-55-r16",
@@ -134,9 +134,9 @@
   },
   {
     "id": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera",
-    "name": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
+    "name": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)",
     "currency": "BRL",
-    "target_price": 500.0,
+    "target_price": 500,
     "active": true,
     "stores": {
       "Mercado Livre": "https://lista.mercadolivre.com.br/Microfone%20de%20Lapela%20Sem%20Fio%20Hollyland%20Lark%20M2%20Combo%20(USB-C%2C%20Lightning%20e%20C%C3%A2mera)",
@@ -146,11 +146,11 @@
       "Casas Bahia": "https://www.casasbahia.com.br/?q=Microfone%20de%20Lapela%20Sem%20Fio%20Hollyland%20Lark%20M2%20Combo%20(USB-C%2C%20Lightning%20e%20C%C3%A2mera)"
     },
     "search_queries": {
-      "Mercado Livre": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
-      "Google Shopping": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
-      "Amazon Brasil": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
-      "Magalu": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
-      "Casas Bahia": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)"
+      "Mercado Livre": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)",
+      "Google Shopping": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)",
+      "Amazon Brasil": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)",
+      "Magalu": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)",
+      "Casas Bahia": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)"
     },
     "exclude_keywords": [
       "cabo",
@@ -173,8 +173,28 @@
       "combo",
       "usb",
       "lightning",
-      "c\u00e2mera"
+      "câmera"
     ],
+    "profile": "fauzer"
+  },
+  {
+    "id": "canhao-de-espuma-wap-snow-foam-encaixe-largo-lt-para-lavadoras-cor-inodoros",
+    "name": "Canhão De Espuma Wap Snow Foam Encaixe Largo Lt Para Lavadoras Cor Inodoros",
+    "currency": "BRL",
+    "target_price": 200,
+    "active": true,
+    "exclude_keywords": [],
+    "relevancy_keywords": [],
+    "stores": {
+      "Mercado Livre": "https://lista.mercadolivre.com.br/Canh%C3%A3o%20De%20Espuma%20Wap%20Snow%20Foam%20Encaixe%20Largo%20Lt%20Para%20Lavadoras%20Cor%20Inodoros",
+      "Google Shopping": "https://www.google.com/search?tbm=shop&q=Canh%C3%A3o%20De%20Espuma%20Wap%20Snow%20Foam%20Encaixe%20Largo%20Lt%20Para%20Lavadoras%20Cor%20Inodoros&hl=pt-BR",
+      "Amazon Brasil": "https://www.amazon.com.br/s?k=Canh%C3%A3o%20De%20Espuma%20Wap%20Snow%20Foam%20Encaixe%20Largo%20Lt%20Para%20Lavadoras%20Cor%20Inodoros"
+    },
+    "search_queries": {
+      "Mercado Livre": "Canhão De Espuma Wap Snow Foam Encaixe Largo Lt Para Lavadoras Cor Inodoros",
+      "Google Shopping": "Canhão De Espuma Wap Snow Foam Encaixe Largo Lt Para Lavadoras Cor Inodoros",
+      "Amazon Brasil": "Canhão De Espuma Wap Snow Foam Encaixe Largo Lt Para Lavadoras Cor Inodoros"
+    },
     "profile": "fauzer"
   }
 ]
