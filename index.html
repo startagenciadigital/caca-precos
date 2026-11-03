@@ -898,35 +898,6 @@
                         </div>
                     </div>
                     
-                    <!-- Filtros de Marca e Similaridade -->
-                    <div style="background: rgba(15, 23, 42, 0.45); border: 1px solid var(--card-border); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; gap: 0.9rem;">
-                        <div>
-                            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600;">
-                                <span><i class="fa-solid fa-tag" style="color: var(--accent-secondary);"></i> Marca Obrigatória:</span>
-                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">(Apenas anúncios desta marca)</span>
-                            </label>
-                            <input type="text" id="new-prod-brand" placeholder="Ex: Wap, Yamaha, Michelin, Hollyland, Sony..." style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.7); color: #fff; font-size: 0.92rem; outline: none;">
-                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.4;">
-                                💡 Defina a marca para evitar que marcas concorrentes (como Kärcher ao buscar Wap) sejam consideradas.
-                            </div>
-                        </div>
-
-                        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 0.65rem; border-top: 1px solid rgba(255, 255, 255, 0.06); gap: 1rem;">
-                            <div>
-                                <div style="font-size: 0.85rem; color: #fff; font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
-                                    <i class="fa-solid fa-arrows-split-up-and-left" style="color: #f59e0b;"></i> Aceitar Produtos Similares / Compatíveis
-                                </div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; line-height: 1.35;">
-                                    Desmarcado: busca estrita da marca e modelo oficial (rejeita peças paralelas e genéricas).
-                                </div>
-                            </div>
-                            <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 24px; margin: 0; flex-shrink: 0;">
-                                <input type="checkbox" id="new-prod-similar">
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-                    </div>
-                    
                     <div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                             <label style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">Lojas para Monitorar:</label>
@@ -1840,8 +1811,6 @@
                 
                 const currBadge = isBrl ? '<span class="badge-curr brl">R$ BRL</span>' : '<span class="badge-curr usd">US$ USD</span>';
                 const ownerBadge = (currentProfile && currentProfile.is_admin && p.profile) ? `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: #c4b5fd; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); padding: 0.15rem 0.5rem; border-radius: 6px;"><i class="fa-solid fa-user"></i> ${p.profile}</span>` : '';
-                const brandBadge = p.required_brand ? `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); padding: 0.15rem 0.5rem; border-radius: 6px;"><i class="fa-solid fa-tag"></i> ${p.required_brand}</span>` : '';
-                const similarBadge = p.allow_similar ? `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); padding: 0.15rem 0.5rem; border-radius: 6px;"><i class="fa-solid fa-arrows-split-up-and-left"></i> Similares OK</span>` : `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: #34d399; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.15rem 0.5rem; border-radius: 6px;"><i class="fa-solid fa-shield-halved"></i> Marca Estrita</span>`;
                 const targetDisplay = (isBrl ? 'R$ ' : '$') + (p.target_price || 0).toLocaleString('pt-BR');
                 const isAct = p.active !== false;
                 const isDefault = (id === currentDefault);
@@ -1856,8 +1825,6 @@
                             </div>
                             <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem; flex-wrap: wrap;">
                                 ${currBadge}
-                                ${brandBadge}
-                                ${similarBadge}
                                 <span style="font-size: 0.8rem; color: var(--text-secondary);">Alvo: <b>${targetDisplay}</b></span>
                             </div>
                         </div>
@@ -2210,27 +2177,6 @@ Clique em Cancelar para MANTER o histórico arquivado.`);
         document.getElementById('modal-close-btn').addEventListener('click', closeManageModal);
         document.getElementById('tab-btn-list').addEventListener('click', () => switchManageTab('list'));
         document.getElementById('tab-btn-new').addEventListener('click', () => switchManageTab('new'));
-        
-        const prodNameInput = document.getElementById('new-prod-name');
-        const prodBrandInput = document.getElementById('new-prod-brand');
-        if (prodNameInput && prodBrandInput) {
-            prodNameInput.addEventListener('input', () => {
-                if (!prodBrandInput.dataset.userEdited) {
-                    const val = prodNameInput.value;
-                    const knownBrands = ['Wap', 'Yamaha', 'Michelin', 'Hollyland', 'Sony', 'Apple', 'Samsung', 'Kärcher', 'Karcher', 'Dell', 'Logitech', 'Pirelli', 'Goodyear', 'Bridgestone', 'Nike', 'Adidas', 'Makita', 'Bosch', 'DeWalt', 'JBL'];
-                    for (const b of knownBrands) {
-                        const regex = new RegExp('\b' + b + '\b', 'i');
-                        if (regex.test(val)) {
-                            prodBrandInput.value = b;
-                            break;
-                        }
-                    }
-                }
-            });
-            prodBrandInput.addEventListener('input', () => {
-                prodBrandInput.dataset.userEdited = 'true';
-            });
-        }
         document.getElementById('btn-cancel-new').addEventListener('click', () => switchManageTab('list'));
         
         // Toggle advanced options
@@ -2315,10 +2261,6 @@ Clique em Cancelar para MANTER o histórico arquivado.`);
                 return;
             }
             
-            // Brand & Similar options
-            const requiredBrand = (document.getElementById('new-prod-brand').value || '').trim();
-            const allowSimilar = document.getElementById('new-prod-similar').checked;
-            
             // Keywords
             const excludeInput = document.getElementById('new-prod-exclude').value.trim();
             const relevancyInput = document.getElementById('new-prod-relevancy').value.trim();
@@ -2344,8 +2286,6 @@ Clique em Cancelar para MANTER o histórico arquivado.`);
                         currency: selectedCurrency,
                         target_price: targetPrice,
                         active: true,
-                        required_brand: requiredBrand,
-                        allow_similar: allowSimilar,
                         exclude_keywords: excludeKeywords,
                         relevancy_keywords: relevancyKeywords,
                         stores: stores,
@@ -2394,8 +2334,6 @@ Clique em Cancelar para MANTER o histórico arquivado.`);
                         currency: selectedCurrency,
                         target_price: targetPrice,
                         active: true,
-                        required_brand: requiredBrand,
-                        allow_similar: allowSimilar,
                         stores: stores,
                         exclude_keywords: excludeKeywords,
                         relevancy_keywords: relevancyKeywords,
