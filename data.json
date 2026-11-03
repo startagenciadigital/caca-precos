@@ -1189,13 +1189,7 @@
       "currency": "BRL",
       "active": true,
       "target_price": 450.0,
-      "best_deal": {
-        "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
-        "price": 286.68,
-        "price_str": "R$ 286.68",
-        "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=20&amp;type=product&amp;tracking_id=920604ed-70a2-4920-bdc6-b370b3f898ff&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
-        "source": "Mercado Livre"
-      },
+      "best_deal": null,
       "deals": [
         {
           "date": "2026-09-14 14:13:59",
@@ -1385,6 +1379,15 @@
           "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
           "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=20&amp;type=product&amp;tracking_id=920604ed-70a2-4920-bdc6-b370b3f898ff&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-03 16:11:54",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
@@ -1395,10 +1398,10 @@
       "active": true,
       "target_price": 500.0,
       "best_deal": {
-        "title": "Peining Microfone de Lapela Sem Fio Duplo USB-C Lightning com Redu\u00e7\u00e3o de Ru\u00eddo",
-        "price": 94.9,
-        "price_str": "R$ 94.90",
-        "link": "https://www.amazon.com.br/sspa/click?ie=UTF8&amp;spc=MTo2MTcwMjU1NjM1NDY4MTc2OjE3OTM3MzMwMDM6c3BfYnRmOjMwMTM4OTY2Mzc0NzQwMjo6MDo6&amp;url=%2FPeining-Microfone-Lapela-Lightning-Redu%25C3%25A7%25C3%25A3o%2Fdp%2FB0GVTT5GP9%2Fref%3Dsr_1_60_sspa%3Fdib%3DeyJ2IjoiMSJ9.t53ou-slsoEv4wbK6iar2yC79LsS913LGRalMV4Q6KUaumXuEVh0H1H7pSIUW_Vr9OwdauMTXk4lkXQL9CRfPsvUGtlSNddPDXtEJU5ZwQimWsjXIhUFlapUYb4rSucwRwB4j323O_UiF-ipIlmi2cI-D5zOnQ7e6y2UbbgQzS_6MTEj7dc9jTt-sWuJZMpFoKEGe4w0F1yTD7I4HDqEywSsBGbnixFyWlWubHrlALL4-rlak0_CgzcxPV7wFQazLQr1r_T0VJ9TJPoaNNM5LTuoG9gslSaizZ_SraU3BZg.kGF2tKtWop88aY9ajHOwxFCL7445pLaEmheL0zW1H2E%26dib_tag%3Dse%26keywords%3DMicrofone%2Bde%2BLapela%2BSem%2BFio%2BHollyland%2BLark%2BM2%2BCombo%2B%2528USB-C%252C%2BLightning%2Be%2BC%25C3%25A2mera%2529%26qid%3D1793733003%26sr%3D8-60-spons%26ufe%3Dapp_do%253Aamzn1.fos.6121c6c4-c969-43ae-92f7-cc248fc6181d%26sp_csd%3Dd2lkZ2V0TmFtZT1zcF9idGY%26psc%3D1",
+        "title": "Hollyland LARK A2 Solo (1TX + 1 Receptor USB-C) Microfone Sem Fio para iPhone/Android",
+        "price": 243.65,
+        "price_str": "R$ 243.65",
+        "link": "https://www.amazon.com.br/Hollyland-LARK-A2-Solo-Microfone/dp/B0HBW24MKQ",
         "source": "Amazon Brasil"
       },
       "deals": [
@@ -1545,6 +1548,15 @@
           "title": "Peining Microfone de Lapela Sem Fio Duplo USB-C Lightning com Redu\u00e7\u00e3o de Ru\u00eddo",
           "link": "https://www.amazon.com.br/sspa/click?ie=UTF8&amp;spc=MTo2MTcwMjU1NjM1NDY4MTc2OjE3OTM3MzMwMDM6c3BfYnRmOjMwMTM4OTY2Mzc0NzQwMjo6MDo6&amp;url=%2FPeining-Microfone-Lapela-Lightning-Redu%25C3%25A7%25C3%25A3o%2Fdp%2FB0GVTT5GP9%2Fref%3Dsr_1_60_sspa%3Fdib%3DeyJ2IjoiMSJ9.t53ou-slsoEv4wbK6iar2yC79LsS913LGRalMV4Q6KUaumXuEVh0H1H7pSIUW_Vr9OwdauMTXk4lkXQL9CRfPsvUGtlSNddPDXtEJU5ZwQimWsjXIhUFlapUYb4rSucwRwB4j323O_UiF-ipIlmi2cI-D5zOnQ7e6y2UbbgQzS_6MTEj7dc9jTt-sWuJZMpFoKEGe4w0F1yTD7I4HDqEywSsBGbnixFyWlWubHrlALL4-rlak0_CgzcxPV7wFQazLQr1r_T0VJ9TJPoaNNM5LTuoG9gslSaizZ_SraU3BZg.kGF2tKtWop88aY9ajHOwxFCL7445pLaEmheL0zW1H2E%26dib_tag%3Dse%26keywords%3DMicrofone%2Bde%2BLapela%2BSem%2BFio%2BHollyland%2BLark%2BM2%2BCombo%2B%2528USB-C%252C%2BLightning%2Be%2BC%25C3%25A2mera%2529%26qid%3D1793733003%26sr%3D8-60-spons%26ufe%3Dapp_do%253Aamzn1.fos.6121c6c4-c969-43ae-92f7-cc248fc6181d%26sp_csd%3Dd2lkZ2V0TmFtZT1zcF9idGY%26psc%3D1",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-03 16:12:18",
+          "price_raw": "R$ 243.65",
+          "usd_price": 243.65,
+          "retailer": "Amazon Brasil",
+          "title": "Hollyland LARK A2 Solo (1TX + 1 Receptor USB-C) Microfone Sem Fio para iPhone/Android",
+          "link": "https://www.amazon.com.br/Hollyland-LARK-A2-Solo-Microfone/dp/B0HBW24MKQ",
+          "status": "TARGET MET!"
         }
       ],
       "profile": "fauzer"
@@ -1570,13 +1582,22 @@
           "title": "K\u00e4rcher 93020540 - Canh\u00e3o de Espuma Aplicador de Detergente Snow Foam para Lavadoras, 300ml",
           "link": "https://www.amazon.com.br/K%C3%A4rcher-93020540-Aplicador-Detergente-Lavadoras/dp/B0777SMHSK",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-03 16:12:33",
+          "price_raw": "R$ 42.75",
+          "usd_price": 42.75,
+          "retailer": "Amazon Brasil",
+          "title": "K\u00e4rcher 93020540 - Canh\u00e3o de Espuma Aplicador de Detergente Snow Foam para Lavadoras, 300ml",
+          "link": "https://www.amazon.com.br/K%C3%A4rcher-93020540-Aplicador-Detergente-Lavadoras/dp/B0777SMHSK",
+          "status": "TARGET MET!"
         }
       ],
       "profile": "fauzer"
     }
   },
-  "usd_to_brl_rate": 5.491,
-  "last_search_time": "2026-11-03 16:09:33",
+  "usd_to_brl_rate": 5.15,
+  "last_search_time": "2026-11-03 16:11:45",
   "search_interval": "3h",
   "default_product": "snow-foam-wap-fw007847"
 }
