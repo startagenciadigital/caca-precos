@@ -134,7 +134,7 @@
   },
   {
     "id": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera",
-    "name": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)",
+    "name": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
     "currency": "BRL",
     "target_price": 500,
     "active": true,
@@ -146,11 +146,11 @@
       "Casas Bahia": "https://www.casasbahia.com.br/?q=Microfone%20de%20Lapela%20Sem%20Fio%20Hollyland%20Lark%20M2%20Combo%20(USB-C%2C%20Lightning%20e%20C%C3%A2mera)"
     },
     "search_queries": {
-      "Mercado Livre": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)",
-      "Google Shopping": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)",
-      "Amazon Brasil": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)",
-      "Magalu": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)",
-      "Casas Bahia": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e Câmera)"
+      "Mercado Livre": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
+      "Google Shopping": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
+      "Amazon Brasil": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
+      "Magalu": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)",
+      "Casas Bahia": "Microfone de Lapela Sem Fio Hollyland Lark M2 Combo (USB-C, Lightning e C\u00e2mera)"
     },
     "exclude_keywords": [
       "cabo",
@@ -173,28 +173,43 @@
       "combo",
       "usb",
       "lightning",
-      "câmera"
+      "c\u00e2mera"
     ],
     "profile": "fauzer"
   },
   {
-    "id": "canhao-de-espuma-wap-snow-foam-encaixe-largo-lt-para-lavadoras-cor-inodoros",
-    "name": "Canhão De Espuma Wap Snow Foam Encaixe Largo Lt Para Lavadoras Cor Inodoros",
+    "id": "snow-foam-wap-fw007847",
+    "name": "Snow Foam Wap fw007847",
     "currency": "BRL",
-    "target_price": 200,
+    "target_price": 200.0,
     "active": true,
-    "exclude_keywords": [],
-    "relevancy_keywords": [],
     "stores": {
-      "Mercado Livre": "https://lista.mercadolivre.com.br/canhao-de-espuma-wap-snow-foam",
-      "Google Shopping": "https://www.google.com/search?tbm=shop&q=Canh%C3%A3o+De+Espuma+Wap+Snow+Foam&hl=pt-BR",
-      "Amazon Brasil": "https://www.amazon.com.br/s?k=Canh%C3%A3o+De+Espuma+Wap+Snow+Foam"
+      "Mercado Livre": "https://lista.mercadolivre.com.br/Snow%20Foam%20Wap%20fw007847",
+      "Google Shopping": "https://www.google.com/search?tbm=shop&q=Snow%20Foam%20Wap%20fw007847&hl=pt-BR",
+      "Amazon Brasil": "https://www.amazon.com.br/s?k=Snow%20Foam%20Wap%20fw007847"
     },
     "search_queries": {
-      "Mercado Livre": "Canhão De Espuma Wap Snow Foam",
-      "Google Shopping": "Canhão De Espuma Wap Snow Foam",
-      "Amazon Brasil": "Canhão De Espuma Wap Snow Foam"
+      "Mercado Livre": "Snow Foam Wap fw007847",
+      "Google Shopping": "Snow Foam Wap fw007847",
+      "Amazon Brasil": "Snow Foam Wap fw007847"
     },
+    "exclude_keywords": [
+      "cabo",
+      "fonte",
+      "adaptador",
+      "capa",
+      "suporte",
+      "manual",
+      "adesivo",
+      "case",
+      "bag"
+    ],
+    "relevancy_keywords": [
+      "snow",
+      "foam",
+      "wap",
+      "fw007847"
+    ],
     "profile": "fauzer"
   }
 ]
