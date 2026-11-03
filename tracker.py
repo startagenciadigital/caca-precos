@@ -860,7 +860,6 @@ def parse_amazon_br(html, relevancy_keywords, exclude_keywords):
         price_offscreen = re.search(r'a-offscreen\">([^<]+)</span>', block)
         price_whole = re.search(r'class="a-price-whole">([\d\.,]+)', block)
         price_frac = re.search(r'class="a-price-fraction">(\d+)</span>', block)
-        link_match = re.search(r'href="(/[^"?]+/dp/[^"/?]+|https://www\.amazon\.com\.br/[^"]*)"', block)
         
         price_val = None
         if price_offscreen:
@@ -891,9 +890,27 @@ def parse_amazon_br(html, relevancy_keywords, exclude_keywords):
             if exclude_keywords and any(kw.lower() in title_lower for kw in exclude_keywords):
                 continue
                 
-            url = link_match.group(1) if link_match else "https://www.amazon.com.br"
-            if url.startswith('/'):
-                url = "https://www.amazon.com.br" + url
+            # Robust Amazon product link extraction
+            url = None
+            dp_match = re.search(r'href="(/[^"?]*(?:/dp/|/gp/product/)[^"]*)"', block)
+            if dp_match:
+                raw_href = dp_match.group(1)
+                asin_match = re.search(r'(/[^"?]+/dp/[A-Z0-9]{8,12}|/dp/[A-Z0-9]{8,12})', raw_href)
+                if asin_match:
+                    url = "https://www.amazon.com.br" + asin_match.group(1)
+                else:
+                    url = "https://www.amazon.com.br" + raw_href
+            elif re.search(r'href="(/gp/slredirect/[^"]*)"', block):
+                sl_match = re.search(r'href="(/gp/slredirect/[^"]*)"', block)
+                url = "https://www.amazon.com.br" + sl_match.group(1)
+            elif re.search(r'<h2[^>]*>.*?<a[^>]+href="([^"]+)"', block, re.DOTALL):
+                h2_link = re.search(r'<h2[^>]*>.*?<a[^>]+href="([^"]+)"', block, re.DOTALL)
+                raw_href = h2_link.group(1)
+                if not raw_href.startswith('javascript:'):
+                    url = ("https://www.amazon.com.br" + raw_href) if raw_href.startswith('/') else raw_href
+            
+            if not url:
+                url = "https://www.amazon.com.br/s?k=" + quote_plus(title[:50])
                 
             items.append({
                 'title': title,
