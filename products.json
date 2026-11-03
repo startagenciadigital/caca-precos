@@ -47,7 +47,9 @@
       "Sweetwater": "yamaha+yc73",
       "Guitar Center": "yamaha+yc73"
     },
-    "profile": "fauzer"
+    "profile": "fauzer",
+    "required_brand": "Yamaha",
+    "allow_similar": false
   },
   {
     "id": "yamaha-yc61",
@@ -97,7 +99,9 @@
       "Sweetwater": "yamaha+yc61",
       "Guitar Center": "yamaha+yc61"
     },
-    "profile": "fauzer"
+    "profile": "fauzer",
+    "required_brand": "Yamaha",
+    "allow_similar": false
   },
   {
     "id": "pneu-michelin-20555-r16",
@@ -130,7 +134,9 @@
       "205",
       "r16"
     ],
-    "profile": "fauzer"
+    "profile": "fauzer",
+    "required_brand": "Michelin",
+    "allow_similar": false
   },
   {
     "id": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera",
@@ -175,7 +181,9 @@
       "lightning",
       "c\u00e2mera"
     ],
-    "profile": "fauzer"
+    "profile": "fauzer",
+    "required_brand": "Hollyland",
+    "allow_similar": false
   },
   {
     "id": "snow-foam-wap-fw007847",
@@ -202,7 +210,12 @@
       "manual",
       "adesivo",
       "case",
-      "bag"
+      "bag",
+      "karcher",
+      "k\u00e4rcher",
+      "vonixx",
+      "manual",
+      "borrifador"
     ],
     "relevancy_keywords": [
       "snow",
@@ -210,6 +223,8 @@
       "wap",
       "fw007847"
     ],
-    "profile": "fauzer"
+    "profile": "fauzer",
+    "required_brand": "Wap",
+    "allow_similar": false
   }
 ]

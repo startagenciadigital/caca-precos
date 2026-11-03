@@ -2,5 +2,4 @@
 
 | Date (UTC-3) | Best Price | Retailer | Details / Link | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| 2026-11-03 16:10:46 | R$ 42.75 | Amazon Brasil | [Kärcher 93020540 - Canhão de Espuma Aplicador de Detergente Snow Foam para Lavadoras, 300ml](https://www.amazon.com.br/K%C3%A4rcher-93020540-Aplicador-Detergente-Lavadoras/dp/B0777SMHSK) | TARGET MET! |
-| 2026-11-03 16:12:33 | R$ 42.75 | Amazon Brasil | [Kärcher 93020540 - Canhão de Espuma Aplicador de Detergente Snow Foam para Lavadoras, 300ml](https://www.amazon.com.br/K%C3%A4rcher-93020540-Aplicador-Detergente-Lavadoras/dp/B0777SMHSK) | TARGET MET! |
+| 2026-11-03 17:00:19 | R$ 56.90 | Amazon Brasil | [Aplicador Snow Foam Canhão de Espuma Dobb LT 300ml para Lavadora Wap Combate Extreme WL Vonder LAV1300 Tramontina Master Intech Texas Kala LK1200 Tekna HLX100 Worker Branco Philco Britania Mondial](https://www.amazon.com.br/Aplicador-Lavadora-Combate-Tramontina-Britania/dp/B0H87PSZTZ) | TARGET MET! |
