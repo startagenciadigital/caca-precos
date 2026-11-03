@@ -1189,13 +1189,7 @@
       "currency": "BRL",
       "active": true,
       "target_price": 450.0,
-      "best_deal": {
-        "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
-        "price": 286.68,
-        "price_str": "R$ 286.68",
-        "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=20&amp;type=product&amp;tracking_id=04d268cb-7fa7-4723-b2e3-c8d7004f0200&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
-        "source": "Mercado Livre"
-      },
+      "best_deal": null,
       "deals": [
         {
           "date": "2026-09-14 14:13:59",
@@ -1349,6 +1343,15 @@
           "title": "Pneu Remold 205/55 R16 GW Tyres Desenho Michelin Aro 16 Carga 89",
           "link": "https://www.mercadolivre.com.br/pneu-remold-20555-r16-gw-tyres-desenho-michelin-aro-16-carga-89/p/MLB45834734#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=stack&amp;position=20&amp;type=product&amp;tracking_id=04d268cb-7fa7-4723-b2e3-c8d7004f0200&amp;overlay_label_capability=not_apply&amp;wid=MLB4033669827&amp;sid=search",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-02 23:46:10",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
@@ -1359,9 +1362,9 @@
       "active": true,
       "target_price": 500.0,
       "best_deal": {
-        "title": "Kit 2 Microfones Sem Fio Lapela para Celular USB-C e Lightning 2.4GHz com Estojo Carregador, Redu\u00e7\u00e3o de Ru\u00eddo e Alcance at\u00e9 20m",
-        "price": 75.02,
-        "price_str": "R$ 75.02",
+        "title": "ULANZI A200 Microfone de Lapela Sem Fio para iPhone e Android, Mini, Bluetooth, Tipo C, Qualidade \u00c1udio 48kHz/24bit, Alcance 100m, Dura\u00e7\u00e3o 6h, Grava\u00e7\u00e3o Profissional para V\u00eddeos, Podcasts e Entrevistas",
+        "price": 198.55,
+        "price_str": "R$ 198.55",
         "link": "https://www.amazon.com.br",
         "source": "Amazon Brasil"
       },
@@ -1473,6 +1476,15 @@
           "title": "Kit 2 Microfones Sem Fio Lapela para Celular USB-C e Lightning 2.4GHz com Estojo Carregador, Redu\u00e7\u00e3o de Ru\u00eddo e Alcance at\u00e9 20m",
           "link": "https://www.amazon.com.br",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-02 23:46:34",
+          "price_raw": "R$ 198.55",
+          "usd_price": 198.55,
+          "retailer": "Amazon Brasil",
+          "title": "ULANZI A200 Microfone de Lapela Sem Fio para iPhone e Android, Mini, Bluetooth, Tipo C, Qualidade \u00c1udio 48kHz/24bit, Alcance 100m, Dura\u00e7\u00e3o 6h, Grava\u00e7\u00e3o Profissional para V\u00eddeos, Podcasts e Entrevistas",
+          "link": "https://www.amazon.com.br",
+          "status": "TARGET MET!"
         }
       ],
       "profile": "fauzer"
@@ -1534,13 +1546,22 @@
           "title": "Snow Foam Pulverizador Manual Borrifador Alta Press\u00e3o 2 Litros Com 3 Bicos Espuma Automotivo Lavagem Carro Moto Limpeza Jardim",
           "link": "https://www.amazon.com.br",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-02 23:46:49",
+          "price_raw": "R$ 38.85",
+          "usd_price": 38.85,
+          "retailer": "Amazon Brasil",
+          "title": "Snow Foam Pulverizador Manual Borrifador Alta Press\u00e3o 2 Litros Com 3 Bicos Espuma Automotivo Lavagem Carro Moto Limpeza Jardim",
+          "link": "https://www.amazon.com.br",
+          "status": "TARGET MET!"
         }
       ],
       "profile": "fauzer"
     }
   },
-  "usd_to_brl_rate": 5.4366,
-  "last_search_time": "2026-11-02 18:00:16",
+  "usd_to_brl_rate": 5.15,
+  "last_search_time": "2026-11-02 23:46:00",
   "search_interval": "3h",
   "default_product": "microfone-de-lapela-sem-fio-hollyland-lark-m2-combo-usb-c-lightning-e-camera"
 }
