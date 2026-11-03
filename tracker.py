@@ -248,12 +248,17 @@ def add_product(data):
     if not exclude and currency == "BRL":
         exclude = ["cabo", "fonte", "adaptador", "capa", "suporte", "manual", "adesivo", "case", "bag"]
         
+    required_brand = str(data.get("required_brand", "")).strip()
+    allow_similar = bool(data.get("allow_similar", False))
+        
     new_prod = {
         "id": prod_id,
         "name": name,
         "currency": currency,
         "target_price": target_price,
         "active": active,
+        "required_brand": required_brand,
+        "allow_similar": allow_similar,
         "stores": stores,
         "search_queries": {k: name for k in stores.keys()},
         "exclude_keywords": exclude,
@@ -285,6 +290,8 @@ def add_product(data):
         "currency": currency,
         "active": active,
         "target_price": target_price,
+        "required_brand": required_brand,
+        "allow_similar": allow_similar,
         "best_deal": None,
         "deals": [],
         "profile": profile
@@ -518,7 +525,72 @@ def fetch_pages_dynamic(stores_dict):
             print(f"HTTP fallback error for {name}: {e}")
     return res_fallback
 
-def parse_ebay(html, relevancy_keywords, exclude_keywords, rate):
+def is_item_valid(title, relevancy_keywords, exclude_keywords, required_brand="", allow_similar=False):
+    if not title:
+        return False
+    title_lower = title.lower()
+    
+    # 1. Exclude keywords check
+    if exclude_keywords:
+        for kw in exclude_keywords:
+            kw_clean = kw.strip().lower()
+            if kw_clean and kw_clean in title_lower:
+                return False
+                
+    # 2. Strict mode: reject third-party compatibility / generic phrasing
+    if not allow_similar:
+        third_party_markers = [
+            "compatível com", "compativel com", "similar a", "tipo ", 
+            "substituto", "paralelo", "genérico", "generico", "universal"
+        ]
+        for marker in third_party_markers:
+            if marker in title_lower:
+                return False
+                
+        # If a required brand is specified, reject titles that list multiple rival brands (universal adapters)
+        rival_brands = ["karcher", "kärcher", "vonder", "tramontina", "philco", "britania", "mondial", "tekna", "intech", "dobb", "sgt", "sigma"]
+        brand_clean = required_brand.strip().lower() if required_brand else ""
+        if brand_clean:
+            rivals_present = [r for r in rival_brands if r != brand_clean and r in title_lower]
+            if len(rivals_present) >= 1:
+                return False
+                
+            # If the brand ONLY appears after "para" or "p/", it is a third-party accessory for that brand
+            m_para = re.search(r'\b(?:para|p/)\b', title_lower)
+            if m_para:
+                before_para = title_lower[:m_para.start()]
+                after_para = title_lower[m_para.start():]
+                brands = [b.strip().lower() for b in required_brand.split(",") if b.strip()]
+                has_before = any(re.search(r'\b' + re.escape(b) + r'\b', before_para) for b in brands)
+                has_after = any(re.search(r'\b' + re.escape(b) + r'\b', after_para) for b in brands)
+                if not has_before and has_after:
+                    return False
+
+    # 3. Required Brand check
+    if required_brand and required_brand.strip():
+        brands = [b.strip().lower() for b in required_brand.split(",") if b.strip()]
+        has_brand = any(re.search(r"\b" + re.escape(b) + r"\b", title_lower) or b in title_lower for b in brands)
+        if not allow_similar and not has_brand:
+            return False
+            
+    # 4. Relevancy keywords check
+    if not allow_similar:
+        if relevancy_keywords:
+            clean_rel = [rk.strip().lower() for rk in relevancy_keywords if rk.strip()]
+            if clean_rel:
+                matches = sum(1 for rk in clean_rel if rk in title_lower)
+                min_matches = len(clean_rel) if len(clean_rel) <= 2 else max(2, int(len(clean_rel) * 0.6))
+                if matches < min_matches:
+                    return False
+    else:
+        if relevancy_keywords:
+            clean_rel = [rk.strip().lower() for rk in relevancy_keywords if rk.strip()]
+            if clean_rel and not any(rk in title_lower for rk in clean_rel):
+                return False
+                
+    return True
+
+def parse_ebay(html, relevancy_keywords, exclude_keywords, rate, required_brand="", allow_similar=False):
     if not html:
         return []
     items = []
@@ -545,10 +617,7 @@ def parse_ebay(html, relevancy_keywords, exclude_keywords, rate):
             
             title_clean = re.sub(r'<[^>]+>', '', title).strip()
             
-            title_lower = title_clean.lower()
-            if not any(rk in title_lower for rk in relevancy_keywords):
-                continue
-            if any(keyword in title_lower for keyword in exclude_keywords):
+            if not is_item_valid(title_clean, relevancy_keywords, exclude_keywords, required_brand, allow_similar):
                 continue
                 
             currency = "BRL" if "R$" in price_raw or "BRL" in price_raw else "USD"
@@ -578,7 +647,7 @@ def parse_ebay(html, relevancy_keywords, exclude_keywords, rate):
                 print(f"Error parsing eBay price '{price_raw}': {e}")
     return items
 
-def parse_bh(html, relevancy_keywords, exclude_keywords):
+def parse_bh(html, relevancy_keywords, exclude_keywords, required_brand="", allow_similar=False):
     if not html:
         return []
     items = []
@@ -589,10 +658,7 @@ def parse_bh(html, relevancy_keywords, exclude_keywords):
         if name_match:
             title_clean = name_match.group(1).strip()
             
-            title_lower = title_clean.lower()
-            if not any(rk in title_lower for rk in relevancy_keywords):
-                continue
-            if any(keyword in title_lower for keyword in exclude_keywords):
+            if not is_item_valid(title_clean, relevancy_keywords, exclude_keywords, required_brand, allow_similar):
                 continue
                 
             url_match = re.search(r'href="([^"]+/product/[^"]+)"', block)
@@ -620,7 +686,7 @@ def parse_bh(html, relevancy_keywords, exclude_keywords):
                 })
     return items
 
-def parse_bestbuy(html, relevancy_keywords, exclude_keywords):
+def parse_bestbuy(html, relevancy_keywords, exclude_keywords, required_brand="", allow_similar=False):
     if not html:
         return []
     items = []
@@ -634,10 +700,7 @@ def parse_bestbuy(html, relevancy_keywords, exclude_keywords):
         if title_match:
             title_clean = title_match.group(1).strip()
             
-            title_lower = title_clean.lower()
-            if not any(rk in title_lower for rk in relevancy_keywords):
-                continue
-            if any(keyword in title_lower for keyword in exclude_keywords):
+            if not is_item_valid(title_clean, relevancy_keywords, exclude_keywords, required_brand, allow_similar):
                 continue
                 
             price_str = price_match.group(1).strip() if price_match else "N/A"
@@ -657,7 +720,7 @@ def parse_bestbuy(html, relevancy_keywords, exclude_keywords):
                     print(f"Error parsing Best Buy price '{price_str}': {e}")
     return items
 
-def parse_sweetwater(html, relevancy_keywords, exclude_keywords):
+def parse_sweetwater(html, relevancy_keywords, exclude_keywords, required_brand="", allow_similar=False):
     if not html:
         return []
     items = []
@@ -689,10 +752,7 @@ def parse_sweetwater(html, relevancy_keywords, exclude_keywords):
             prod_name = h.get('productName', '')
             title_clean = f"{brand} {prod_name}".strip()
             
-            title_lower = title_clean.lower()
-            if not any(rk in title_lower for rk in relevancy_keywords):
-                continue
-            if any(keyword in title_lower for keyword in exclude_keywords):
+            if not is_item_valid(title_clean, relevancy_keywords, exclude_keywords, required_brand, allow_similar):
                 continue
                 
             price_dict = h.get('price', {}) or {}
@@ -713,7 +773,7 @@ def parse_sweetwater(html, relevancy_keywords, exclude_keywords):
         
     return items
 
-def parse_guitarcenter(html, relevancy_keywords, exclude_keywords):
+def parse_guitarcenter(html, relevancy_keywords, exclude_keywords, required_brand="", allow_similar=False):
     if not html:
         return []
     items = []
@@ -732,10 +792,7 @@ def parse_guitarcenter(html, relevancy_keywords, exclude_keywords):
         if title_match and price_match:
             title_clean = title_match.group(1).strip()
             
-            title_lower = title_clean.lower()
-            if not any(rk in title_lower for rk in relevancy_keywords):
-                continue
-            if any(keyword in title_lower for keyword in exclude_keywords):
+            if not is_item_valid(title_clean, relevancy_keywords, exclude_keywords, required_brand, allow_similar):
                 continue
                 
             price_str = price_match.group(1).strip()
@@ -752,7 +809,7 @@ def parse_guitarcenter(html, relevancy_keywords, exclude_keywords):
             })
     return items
 
-def parse_mercadolivre(html, relevancy_keywords, exclude_keywords):
+def parse_mercadolivre(html, relevancy_keywords, exclude_keywords, required_brand="", allow_similar=False):
     if not html:
         return []
     items = []
@@ -769,10 +826,7 @@ def parse_mercadolivre(html, relevancy_keywords, exclude_keywords):
         
         if title_match and (price_int_match or re.search(r'R\$\s*([\d\.]+(?:,\d{2})?)', block)):
             title = title_match.group(1).strip()
-            title_lower = title.lower()
-            if relevancy_keywords and not any(rk.lower() in title_lower for rk in relevancy_keywords):
-                continue
-            if exclude_keywords and any(kw.lower() in title_lower for kw in exclude_keywords):
+            if not is_item_valid(title, relevancy_keywords, exclude_keywords, required_brand, allow_similar):
                 continue
                 
             if price_int_match:
@@ -799,7 +853,7 @@ def parse_mercadolivre(html, relevancy_keywords, exclude_keywords):
             })
     return items
 
-def parse_google_shopping(html, relevancy_keywords, exclude_keywords):
+def parse_google_shopping(html, relevancy_keywords, exclude_keywords, required_brand="", allow_similar=False):
     if not html:
         return []
     items = []
@@ -820,10 +874,7 @@ def parse_google_shopping(html, relevancy_keywords, exclude_keywords):
         
         if title_match and price_match:
             title = title_match.group(1).strip()
-            title_lower = title.lower()
-            if relevancy_keywords and not any(rk.lower() in title_lower for rk in relevancy_keywords):
-                continue
-            if exclude_keywords and any(kw.lower() in title_lower for kw in exclude_keywords):
+            if not is_item_valid(title, relevancy_keywords, exclude_keywords, required_brand, allow_similar):
                 continue
                 
             p_str = price_match.group(1).strip() if hasattr(price_match, 'group') else str(price_match)
@@ -850,7 +901,7 @@ def parse_google_shopping(html, relevancy_keywords, exclude_keywords):
             })
     return items
 
-def parse_amazon_br(html, relevancy_keywords, exclude_keywords):
+def parse_amazon_br(html, relevancy_keywords, exclude_keywords, required_brand="", allow_similar=False):
     if not html:
         return []
     items = []
@@ -884,10 +935,7 @@ def parse_amazon_br(html, relevancy_keywords, exclude_keywords):
                 
         if title_match and price_val is not None and price_val > 0:
             title = title_match.group(1).strip()
-            title_lower = title.lower()
-            if relevancy_keywords and not any(rk.lower() in title_lower for rk in relevancy_keywords):
-                continue
-            if exclude_keywords and any(kw.lower() in title_lower for kw in exclude_keywords):
+            if not is_item_valid(title, relevancy_keywords, exclude_keywords, required_brand, allow_similar):
                 continue
                 
             # Robust Amazon product link extraction
@@ -921,7 +969,7 @@ def parse_amazon_br(html, relevancy_keywords, exclude_keywords):
             })
     return items
 
-def parse_pneustore(html, relevancy_keywords, exclude_keywords):
+def parse_pneustore(html, relevancy_keywords, exclude_keywords, required_brand="", allow_similar=False):
     if not html:
         return []
     items = []
@@ -935,10 +983,7 @@ def parse_pneustore(html, relevancy_keywords, exclude_keywords):
         
         if title_match and price_match:
             title = title_match.group(1).strip()
-            title_lower = title.lower()
-            if relevancy_keywords and not any(rk.lower() in title_lower for rk in relevancy_keywords):
-                continue
-            if exclude_keywords and any(kw.lower() in title_lower for kw in exclude_keywords):
+            if not is_item_valid(title, relevancy_keywords, exclude_keywords, required_brand, allow_similar):
                 continue
             try:
                 price_val = float(price_match.group(1).replace('.', '').replace(',', '.'))
@@ -954,7 +999,7 @@ def parse_pneustore(html, relevancy_keywords, exclude_keywords):
                 continue
     return items
 
-def parse_generic_store(html, store_name, relevancy_keywords, exclude_keywords, currency="BRL"):
+def parse_generic_store(html, store_name, relevancy_keywords, exclude_keywords, currency="BRL", required_brand="", allow_similar=False):
     if not html:
         return []
     items = []
@@ -963,10 +1008,7 @@ def parse_generic_store(html, store_name, relevancy_keywords, exclude_keywords, 
         text = re.sub(r'<[^>]+>', ' ', content).strip()
         if len(text) < 10:
             continue
-        text_lower = text.lower()
-        if relevancy_keywords and not any(rk.lower() in text_lower for rk in relevancy_keywords):
-            continue
-        if exclude_keywords and any(kw.lower() in text_lower for kw in exclude_keywords):
+        if not is_item_valid(text, relevancy_keywords, exclude_keywords, required_brand, allow_similar):
             continue
             
         if currency == "BRL":
@@ -1001,28 +1043,28 @@ def parse_generic_store(html, store_name, relevancy_keywords, exclude_keywords, 
                     pass
     return items
 
-def parse_store_page(store_name, html, relevancy_keywords, exclude_keywords, rate, currency="BRL"):
+def parse_store_page(store_name, html, relevancy_keywords, exclude_keywords, rate, currency="BRL", required_brand="", allow_similar=False):
     name_lower = store_name.lower()
     if "mercado livre" in name_lower or "mercadolivre" in name_lower:
-        return parse_mercadolivre(html, relevancy_keywords, exclude_keywords)
+        return parse_mercadolivre(html, relevancy_keywords, exclude_keywords, required_brand, allow_similar)
     elif "google" in name_lower or "shopping" in name_lower:
-        return parse_google_shopping(html, relevancy_keywords, exclude_keywords)
+        return parse_google_shopping(html, relevancy_keywords, exclude_keywords, required_brand, allow_similar)
     elif "amazon" in name_lower and ("br" in name_lower or "brasil" in name_lower or currency == "BRL"):
-        return parse_amazon_br(html, relevancy_keywords, exclude_keywords)
+        return parse_amazon_br(html, relevancy_keywords, exclude_keywords, required_brand, allow_similar)
     elif "pneustore" in name_lower:
-        return parse_pneustore(html, relevancy_keywords, exclude_keywords)
+        return parse_pneustore(html, relevancy_keywords, exclude_keywords, required_brand, allow_similar)
     elif "ebay" in name_lower:
-        return parse_ebay(html, relevancy_keywords, exclude_keywords, rate)
+        return parse_ebay(html, relevancy_keywords, exclude_keywords, rate, required_brand, allow_similar)
     elif "sweetwater" in name_lower:
-        return parse_sweetwater(html, relevancy_keywords, exclude_keywords)
+        return parse_sweetwater(html, relevancy_keywords, exclude_keywords, required_brand, allow_similar)
     elif "b&h" in name_lower or "bh" in name_lower:
-        return parse_bh(html, relevancy_keywords, exclude_keywords)
+        return parse_bh(html, relevancy_keywords, exclude_keywords, required_brand, allow_similar)
     elif "guitar" in name_lower:
-        return parse_guitarcenter(html, relevancy_keywords, exclude_keywords)
+        return parse_guitarcenter(html, relevancy_keywords, exclude_keywords, required_brand, allow_similar)
     elif "best buy" in name_lower or "bestbuy" in name_lower:
-        return parse_bestbuy(html, relevancy_keywords, exclude_keywords)
+        return parse_bestbuy(html, relevancy_keywords, exclude_keywords, required_brand, allow_similar)
     else:
-        return parse_generic_store(html, store_name, relevancy_keywords, exclude_keywords, currency)
+        return parse_generic_store(html, store_name, relevancy_keywords, exclude_keywords, currency, required_brand, allow_similar)
 
 def parse_log_file(filepath):
     deals = []
@@ -2086,6 +2128,35 @@ def generate_dashboard():
                         </div>
                     </div>
                     
+                    <!-- Filtros de Marca e Similaridade -->
+                    <div style="background: rgba(15, 23, 42, 0.45); border: 1px solid var(--card-border); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; gap: 0.9rem;">
+                        <div>
+                            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 600;">
+                                <span><i class="fa-solid fa-tag" style="color: var(--accent-secondary);"></i> Marca Obrigatória:</span>
+                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">(Apenas anúncios desta marca)</span>
+                            </label>
+                            <input type="text" id="new-prod-brand" placeholder="Ex: Wap, Yamaha, Michelin, Hollyland, Sony..." style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.7); color: #fff; font-size: 0.92rem; outline: none;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.4;">
+                                💡 Defina a marca para evitar que marcas concorrentes (como Kärcher ao buscar Wap) sejam consideradas.
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 0.65rem; border-top: 1px solid rgba(255, 255, 255, 0.06); gap: 1rem;">
+                            <div>
+                                <div style="font-size: 0.85rem; color: #fff; font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
+                                    <i class="fa-solid fa-arrows-split-up-and-left" style="color: #f59e0b;"></i> Aceitar Produtos Similares / Compatíveis
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; line-height: 1.35;">
+                                    Desmarcado: busca estrita da marca e modelo oficial (rejeita peças paralelas e genéricas).
+                                </div>
+                            </div>
+                            <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 24px; margin: 0; flex-shrink: 0;">
+                                <input type="checkbox" id="new-prod-similar">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
                     <div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                             <label style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">Lojas para Monitorar:</label>
@@ -2999,6 +3070,8 @@ def generate_dashboard():
                 
                 const currBadge = isBrl ? '<span class="badge-curr brl">R$ BRL</span>' : '<span class="badge-curr usd">US$ USD</span>';
                 const ownerBadge = (currentProfile && currentProfile.is_admin && p.profile) ? `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: #c4b5fd; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); padding: 0.15rem 0.5rem; border-radius: 6px;"><i class="fa-solid fa-user"></i> ${{p.profile}}</span>` : '';
+                const brandBadge = p.required_brand ? `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); padding: 0.15rem 0.5rem; border-radius: 6px;"><i class="fa-solid fa-tag"></i> ${{p.required_brand}}</span>` : '';
+                const similarBadge = p.allow_similar ? `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); padding: 0.15rem 0.5rem; border-radius: 6px;"><i class="fa-solid fa-arrows-split-up-and-left"></i> Similares OK</span>` : `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: #34d399; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.15rem 0.5rem; border-radius: 6px;"><i class="fa-solid fa-shield-halved"></i> Marca Estrita</span>`;
                 const targetDisplay = (isBrl ? 'R$ ' : '$') + (p.target_price || 0).toLocaleString('pt-BR');
                 const isAct = p.active !== false;
                 const isDefault = (id === currentDefault);
@@ -3013,6 +3086,8 @@ def generate_dashboard():
                             </div>
                             <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem; flex-wrap: wrap;">
                                 ${{currBadge}}
+                                ${{brandBadge}}
+                                ${{similarBadge}}
                                 <span style="font-size: 0.8rem; color: var(--text-secondary);">Alvo: <b>${{targetDisplay}}</b></span>
                             </div>
                         </div>
@@ -3362,6 +3437,27 @@ def generate_dashboard():
         document.getElementById('modal-close-btn').addEventListener('click', closeManageModal);
         document.getElementById('tab-btn-list').addEventListener('click', () => switchManageTab('list'));
         document.getElementById('tab-btn-new').addEventListener('click', () => switchManageTab('new'));
+        
+        const prodNameInput = document.getElementById('new-prod-name');
+        const prodBrandInput = document.getElementById('new-prod-brand');
+        if (prodNameInput && prodBrandInput) {{
+            prodNameInput.addEventListener('input', () => {{
+                if (!prodBrandInput.dataset.userEdited) {{
+                    const val = prodNameInput.value;
+                    const knownBrands = ['Wap', 'Yamaha', 'Michelin', 'Hollyland', 'Sony', 'Apple', 'Samsung', 'Kärcher', 'Karcher', 'Dell', 'Logitech', 'Pirelli', 'Goodyear', 'Bridgestone', 'Nike', 'Adidas', 'Makita', 'Bosch', 'DeWalt', 'JBL'];
+                    for (const b of knownBrands) {{
+                        const regex = new RegExp('\\b' + b + '\\b', 'i');
+                        if (regex.test(val)) {{
+                            prodBrandInput.value = b;
+                            break;
+                        }}
+                    }}
+                }}
+            }});
+            prodBrandInput.addEventListener('input', () => {{
+                prodBrandInput.dataset.userEdited = 'true';
+            }});
+        }}
         document.getElementById('btn-cancel-new').addEventListener('click', () => switchManageTab('list'));
         
         // Toggle advanced options
@@ -3446,6 +3542,10 @@ def generate_dashboard():
                 return;
             }}
             
+            // Brand & Similar options
+            const requiredBrand = (document.getElementById('new-prod-brand').value || '').trim();
+            const allowSimilar = document.getElementById('new-prod-similar').checked;
+            
             // Keywords
             const excludeInput = document.getElementById('new-prod-exclude').value.trim();
             const relevancyInput = document.getElementById('new-prod-relevancy').value.trim();
@@ -3471,6 +3571,8 @@ def generate_dashboard():
                         currency: selectedCurrency,
                         target_price: targetPrice,
                         active: true,
+                        required_brand: requiredBrand,
+                        allow_similar: allowSimilar,
                         exclude_keywords: excludeKeywords,
                         relevancy_keywords: relevancyKeywords,
                         stores: stores,
@@ -3519,6 +3621,8 @@ def generate_dashboard():
                         currency: selectedCurrency,
                         target_price: targetPrice,
                         active: true,
+                        required_brand: requiredBrand,
+                        allow_similar: allowSimilar,
                         stores: stores,
                         exclude_keywords: excludeKeywords,
                         relevancy_keywords: relevancyKeywords,
@@ -3784,6 +3888,8 @@ def run_tracker():
                 "currency": currency,
                 "active": False,
                 "target_price": target_price,
+                "required_brand": prod.get("required_brand", ""),
+                "allow_similar": bool(prod.get("allow_similar", False)),
                 "best_deal": prev_best,
                 "deals": deals,
                 "profile": prod.get("profile", "fauzer")
@@ -3793,6 +3899,8 @@ def run_tracker():
         active_count += 1
         relevancy_keywords = prod.get("relevancy_keywords", [])
         exclude_keywords = prod.get("exclude_keywords", [])
+        required_brand = prod.get("required_brand", "")
+        allow_similar = bool(prod.get("allow_similar", False))
         
         # Build stores dict
         stores = prod.get("stores", {})
@@ -3811,7 +3919,7 @@ def run_tracker():
         pages = fetch_pages_dynamic(stores)
         all_deals = []
         for sname, html in pages.items():
-            s_deals = parse_store_page(sname, html, relevancy_keywords, exclude_keywords, rate, currency)
+            s_deals = parse_store_page(sname, html, relevancy_keywords, exclude_keywords, rate, currency, required_brand, allow_similar)
             all_deals.extend(s_deals)
             
         valid_deals = [d for d in all_deals if d['price'] >= min_price]
@@ -3842,6 +3950,8 @@ def run_tracker():
             "currency": currency,
             "active": True,
             "target_price": target_price,
+            "required_brand": required_brand,
+            "allow_similar": allow_similar,
             "best_deal": best_deal,
             "deals": deals,
             "profile": prod.get("profile", "fauzer")
