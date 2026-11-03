@@ -3,3 +3,4 @@
 | Date (UTC-3) | Best Price | Retailer | Details / Link | Status |
 | :--- | :--- | :--- | :--- | :--- |
 | 2026-11-03 17:00:19 | R$ 56.90 | Amazon Brasil | [Aplicador Snow Foam Canhão de Espuma Dobb LT 300ml para Lavadora Wap Combate Extreme WL Vonder LAV1300 Tramontina Master Intech Texas Kala LK1200 Tekna HLX100 Worker Branco Philco Britania Mondial](https://www.amazon.com.br/Aplicador-Lavadora-Combate-Tramontina-Britania/dp/B0H87PSZTZ) | TARGET MET! |
+| 2026-11-03 17:03:32 | R$ 77.90 | Mercado Livre | [Snow Foam Aplicador De Detergente Para Wap Agil Lider 1800](https://www.mercadolivre.com.br/snow-foam-aplicador-de-detergente-para-wap-agil-lider-1800/p/MLB2116993963#polycard_client=search-desktop&amp;be_origin=backend&amp;overlay_label=not_apply&amp;search_layout=grid&amp;position=29&amp;type=product&amp;tracking_id=4049d00a-6deb-401e-b2f3-9269b88219ac&amp;overlay_label_capability=not_apply&amp;wid=MLB1798481499&amp;sid=search) | TARGET MET! |
