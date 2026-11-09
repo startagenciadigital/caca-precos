@@ -1508,6 +1508,15 @@
           "title": "No items found",
           "link": "N/A",
           "status": "Searching..."
+        },
+        {
+          "date": "2026-11-08 21:30:51",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
@@ -1805,6 +1814,15 @@
           "title": "Hollyland LARK A2 Solo (1TX + 1 Receptor USB-C) Microfone Sem Fio para iPhone/Android",
           "link": "https://www.amazon.com.br/Hollyland-LARK-A2-Solo-Microfone/dp/B0HBW24MKQ",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-08 21:31:15",
+          "price_raw": "R$ 243.65",
+          "usd_price": 243.65,
+          "retailer": "Amazon Brasil",
+          "title": "Hollyland LARK A2 Solo (1TX + 1 Receptor USB-C) Microfone Sem Fio para iPhone/Android",
+          "link": "https://www.amazon.com.br/Hollyland-LARK-A2-Solo-Microfone/dp/B0HBW24MKQ",
+          "status": "TARGET MET!"
         }
       ],
       "profile": "fauzer"
@@ -1949,13 +1967,22 @@
           "title": "Canh\u00e3o Espuma Snow Foam Wap Silent Power Ultra 2800 Aplicador Detergente Difusor Espuma Densa",
           "link": "https://www.amazon.com.br/Canh%C3%A3o-2800-Aplicador-Detergente-Difusor/dp/B0G633GB5W",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-08 21:31:30",
+          "price_raw": "R$ 94.90",
+          "usd_price": 94.9,
+          "retailer": "Amazon Brasil",
+          "title": "Canh\u00e3o Espuma Snow Foam Wap Silent Power Ultra 2800 Aplicador Detergente Difusor Espuma Densa",
+          "link": "https://www.amazon.com.br/Canh%C3%A3o-2800-Aplicador-Detergente-Difusor/dp/B0G633GB5W",
+          "status": "TARGET MET!"
         }
       ],
       "profile": "fauzer"
     }
   },
   "usd_to_brl_rate": 5.15,
-  "last_search_time": "2026-11-08 14:35:26",
+  "last_search_time": "2026-11-08 21:30:40",
   "search_interval": "3h",
   "default_product": "snow-foam-wap-fw007847"
 }
