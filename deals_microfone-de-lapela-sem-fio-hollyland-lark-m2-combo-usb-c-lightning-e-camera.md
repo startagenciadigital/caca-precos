@@ -34,3 +34,4 @@
 | 2026-11-07 21:11:50 | R$ 243.65 | Amazon Brasil | [Hollyland LARK A2 Solo (1TX + 1 Receptor USB-C) Microfone Sem Fio para iPhone/Android](https://www.amazon.com.br/Hollyland-LARK-A2-Solo-Microfone/dp/B0HBW24MKQ) | TARGET MET! |
 | 2026-11-08 14:36:03 | R$ 243.65 | Amazon Brasil | [Hollyland LARK A2 Solo (1TX + 1 Receptor USB-C) Microfone Sem Fio para iPhone/Android](https://www.amazon.com.br/Hollyland-LARK-A2-Solo-Microfone/dp/B0HBW24MKQ) | TARGET MET! |
 | 2026-11-08 21:31:15 | R$ 243.65 | Amazon Brasil | [Hollyland LARK A2 Solo (1TX + 1 Receptor USB-C) Microfone Sem Fio para iPhone/Android](https://www.amazon.com.br/Hollyland-LARK-A2-Solo-Microfone/dp/B0HBW24MKQ) | TARGET MET! |
+| 2026-11-09 18:55:11 | R$ 331.55 | Amazon Brasil | [Hollyland LARK A2 Mini Duo(2TX + 1Receptor USB-C) Microfone Sem Fio](https://www.amazon.com.br/Hollyland-LARK-Mini-Duo-USB-C/dp/B0HJZ9KSN3) | TARGET MET! |
