@@ -1643,6 +1643,15 @@
           "title": "No items found",
           "link": "N/A",
           "status": "Searching..."
+        },
+        {
+          "date": "2026-11-17 17:26:55",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
@@ -2075,6 +2084,15 @@
           "title": "Hollyland LARK A2 Solo (1TX + 1 Receptor USB-C) Microfone Sem Fio para iPhone/Android",
           "link": "https://www.amazon.com.br/Hollyland-LARK-A2-Solo-Microfone/dp/B0HBW24MKQ",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-17 17:27:18",
+          "price_raw": "R$ 243.66",
+          "usd_price": 243.66,
+          "retailer": "Amazon Brasil",
+          "title": "Hollyland LARK A2 Solo (1TX + 1 Receptor USB-C) Microfone Sem Fio para iPhone/Android",
+          "link": "https://www.amazon.com.br/Hollyland-LARK-A2-Solo-Microfone/dp/B0HBW24MKQ",
+          "status": "TARGET MET!"
         }
       ],
       "profile": "fauzer"
@@ -2087,10 +2105,10 @@
       "required_brand": "Wap",
       "allow_similar": false,
       "best_deal": {
-        "title": "Canh\u00e3o de Espuma Aplicador de Detergente Wap Snow Foam Encaixe Fino para Lavadoras WAP",
-        "price": 39.99,
-        "price_str": "R$ 39.99",
-        "link": "https://www.amazon.com.br/SNOW-FOAM-1000ml-ENCAIXE-WAP/dp/B07VS45N81",
+        "title": "Canh\u00e3o Espuma Snow Foam Wap Silent Power Ultra 2800 Aplicador Detergente Difusor Espuma Densa",
+        "price": 94.9,
+        "price_str": "R$ 94.90",
+        "link": "https://www.amazon.com.br/Canh%C3%A3o-2800-Aplicador-Detergente-Difusor/dp/B0G633GB5W",
         "source": "Amazon Brasil"
       },
       "deals": [
@@ -2354,13 +2372,22 @@
           "title": "Canh\u00e3o de Espuma Aplicador de Detergente Wap Snow Foam Encaixe Fino para Lavadoras WAP",
           "link": "https://www.amazon.com.br/SNOW-FOAM-1000ml-ENCAIXE-WAP/dp/B07VS45N81",
           "status": "TARGET MET!"
+        },
+        {
+          "date": "2026-11-17 17:27:33",
+          "price_raw": "R$ 94.90",
+          "usd_price": 94.9,
+          "retailer": "Amazon Brasil",
+          "title": "Canh\u00e3o Espuma Snow Foam Wap Silent Power Ultra 2800 Aplicador Detergente Difusor Espuma Densa",
+          "link": "https://www.amazon.com.br/Canh%C3%A3o-2800-Aplicador-Detergente-Difusor/dp/B0G633GB5W",
+          "status": "TARGET MET!"
         }
       ],
       "profile": "fauzer"
     }
   },
   "usd_to_brl_rate": 5.15,
-  "last_search_time": "2026-11-16 18:37:44",
+  "last_search_time": "2026-11-17 17:26:45",
   "search_interval": "3h",
   "default_product": "snow-foam-wap-fw007847"
 }
