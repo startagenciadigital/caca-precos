@@ -33,3 +33,4 @@
 | 2026-11-16 18:38:34 | R$ 39.99 | Amazon Brasil | [Canhão de Espuma Aplicador de Detergente Wap Snow Foam Encaixe Fino para Lavadoras WAP](https://www.amazon.com.br/SNOW-FOAM-1000ml-ENCAIXE-WAP/dp/B07VS45N81) | TARGET MET! |
 | 2026-11-17 17:27:33 | R$ 94.90 | Amazon Brasil | [Canhão Espuma Snow Foam Wap Silent Power Ultra 2800 Aplicador Detergente Difusor Espuma Densa](https://www.amazon.com.br/Canh%C3%A3o-2800-Aplicador-Detergente-Difusor/dp/B0G633GB5W) | TARGET MET! |
 | 2026-11-17 23:44:07 | R$ 94.90 | Amazon Brasil | [Canhão Espuma Snow Foam Wap Silent Power Ultra 2800 Aplicador Detergente Difusor Espuma Densa](https://www.amazon.com.br/Canh%C3%A3o-2800-Aplicador-Detergente-Difusor/dp/B0G633GB5W) | TARGET MET! |
+| 2026-11-18 16:57:20 | R$ 94.90 | Amazon Brasil | [Canhão Espuma Snow Foam Wap Extreme Turbo Ultra 2800 Aplicador Detergente Difusor Espuma Densa](https://www.amazon.com.br/Extreme-2800-Aplicador-Detergente-Difusor/dp/B0G62RTG16) | TARGET MET! |
