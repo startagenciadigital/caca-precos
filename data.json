@@ -1733,6 +1733,15 @@
           "title": "No items found",
           "link": "N/A",
           "status": "Searching..."
+        },
+        {
+          "date": "2026-11-22 16:00:32",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
@@ -2249,6 +2258,15 @@
           "title": "No items found",
           "link": "N/A",
           "status": "Searching..."
+        },
+        {
+          "date": "2026-11-22 16:00:55",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
@@ -2612,13 +2630,22 @@
           "title": "No items found",
           "link": "N/A",
           "status": "Searching..."
+        },
+        {
+          "date": "2026-11-22 16:01:08",
+          "price_raw": "N/A",
+          "usd_price": null,
+          "retailer": "None",
+          "title": "No items found",
+          "link": "N/A",
+          "status": "Searching..."
         }
       ],
       "profile": "fauzer"
     }
   },
   "usd_to_brl_rate": 5.15,
-  "last_search_time": "2026-11-21 21:55:58",
+  "last_search_time": "2026-11-22 16:00:21",
   "search_interval": "3h",
   "default_product": "snow-foam-wap-fw007847"
 }
