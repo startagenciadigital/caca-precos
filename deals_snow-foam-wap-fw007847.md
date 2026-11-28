@@ -49,3 +49,4 @@
 | 2026-11-26 17:54:34 | N/A | None | No items found | Searching... |
 | 2026-11-27 00:29:01 | N/A | None | No items found | Searching... |
 | 2026-11-27 17:40:26 | N/A | None | No items found | Searching... |
+| 2026-11-28 00:04:48 | R$ 94.90 | Amazon Brasil | [Canhão Espuma Snow Foam Wap Silent Power Ultra 2800 Aplicador Detergente Difusor Espuma Densa](https://www.amazon.com.br/Canh%C3%A3o-2800-Aplicador-Detergente-Difusor/dp/B0G633GB5W) | TARGET MET! |
